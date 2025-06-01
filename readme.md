@@ -67,7 +67,7 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
 - Auto requeue when all players in the party have finished the game
 - Auto lobby hopping (/play arcade_dropper) based on player count in lobby, weighing past lobby options, and command cooldown restriction (bypassable?)
   - 9+ players means stay imo at least for a simple algorithm
-- (Semi)auto report player API stats when joining a lobby to spot someone else who is running the game (or someone who's nicked) (and include gradually expiring cache to not overwhelm Hypixel API)
+- (Semi)auto report player API stats (in chat or tab menu) to spot someone else who is running the game (or someone who's nicked) (and include gradually expiring cache to not overwhelm Hypixel API)
 - Auto voting, including auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
 - Track map times for performance measurement and allow viewing several performance insights through commands
 - Real time leaderboard based on player last seen positions (ambitious)
