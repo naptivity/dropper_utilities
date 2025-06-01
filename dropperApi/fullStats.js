@@ -18,7 +18,7 @@ export async function getPlayerStats(identifier) {
     }
     return json
   } catch (error) {
-    console.log("Unexpected full Dropper API error - please report to lapisfloof on Discord:")
+    console.log("Unexpected full Dropper API error - please report to lapisfloof/naptivity on Discord:")
     console.log(error)
     return null
   }

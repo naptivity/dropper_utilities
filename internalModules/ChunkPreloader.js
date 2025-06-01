@@ -1,7 +1,7 @@
 import { chunks } from "../data/chunkCacheHandler.js"
 import { serialize, deserialize } from "v8"
 import { deflateRawSync, inflateRawSync } from "zlib"
-import { config } from "../config/configHandler.js"
+import { config } from "../configHandler.js"
 
 export class ChunkPreloader {
   constructor(clientHandler) {

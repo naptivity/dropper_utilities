@@ -1,14 +1,15 @@
-export default `# Config version, used to quickly validate the config and make sure it will have all of the necessary information in it. Do not change this unless you know what you're doing.
-config-version: 4
+export default `# Config version, used to make sure the config file isn't outdated. Don't mess with this unless you like breaking stuff :3
+config-version: 5
 
-# Port to host the server on. Usually you can leave this on 25565, which is Minecraft's default port.
+# Port to host the server on. Most likely you should leave this as 25565 (Minecraft's default port) so you can just connect to localhost
+# In the case you are already hosting some other MC server on your machine using port 25565, change it to another unused port # and connect to localhost:<new port #> instead
 server-port: 25565
 
-# The server's host. Recommended to leave this on 127.0.0.1.
+# The server's host. Recommended to leave this on 127.0.0.1 (aka localhost)
 server-host: 127.0.0.1
 
-# Perfect map configurations for automatic requeueing if the maps are incorrect. If /rpm is used with no argument, "default" is chosen.
-# As with the rest of the config, make sure this stays in the same general format if you modify it otherwise it may break.
+# Perfect map configurations for automatic requeueing if the maps are incorrect. If /rpm is used with no argument, "default" is chosen
+# When making changes, maintain the format to prevent errors
 # There MUST be a default config.
 perfect-maps:
   default:

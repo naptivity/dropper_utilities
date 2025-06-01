@@ -1,4 +1,4 @@
-import { config } from "../config/configHandler.js"
+import { config } from "../configHandler.js"
 import { getStats } from "../dropperApi/statsHandler.js"
 import { randomString } from "../utils/utils.js"
 

@@ -121,15 +121,16 @@ export class ClientHandler extends EventEmitter {
     })
     userClient.on("end", (reason) => {
       proxyClient.end()
+      console.log(reason)
       this.destroy()
     })
     proxyClient.on("end", (reason) => {
       userClient.end(`§cProxy lost connection to Hypixel: §r${reason}`)
+      console.log(`§cProxy lost connection to Hypixel: §r${reason}`)
     })
     userClient.on("error", () => {})
     proxyClient.on("error", () => {})
-    //if the proxy client gets kicked while logging in, kick the user client
-    proxyClient.once("disconnect", data => {
+    proxyClient.once("disconnect", data => { //if the proxy client gets kicked while logging in, kick the user client
       userClient.write("kick_disconnect", data)
     })
   }

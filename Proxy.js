@@ -1,20 +1,20 @@
-import { createServer } from "minecraft-protocol"
-import { ClientHandler } from "./ClientHandler.js"
+import { createServer } from "minecraft-protocol"  //minecraft-protocol is https://github.com/PrismarineJS/node-minecraft-protocol which is just the mc packet interfacing library
+import { ClientHandler } from "./ClientHandler.js" 
 import faviconText from "./favicon.js"
 import minecraftData from "minecraft-data"
-import { config } from "./config/configHandler.js"
+import { config } from "./configHandler.js" 
 
-const supportedString = "Please use 1.8, 1.11, 1.12, or 1.14-1.20.\nSubversions (up to 1.20.1) are also supported."
+const supportedString = "Please use 1.8.9 or 1.19-1.21.5"
 
 export class Proxy {
   constructor() {
-    this.version = "1.5.1"
+    this.version = "2.0.0" //i feel like all the changes im making and the fact im revamping a 2 year old program deserves a 2.0
 
     this.proxyServer = createServer({
-      "online-mode": true,
-      keepAlive: false,
-      version: false,
-      port: config["server-port"],
+      "online-mode": true, //of course this is a legit mc server so online mode gotta be on
+      keepAlive: false, //stops the proxy server from checking if the client is alive with keep alive packets, so it wont know when a client dcs
+      version: false, //since this server should support several different versions obviously not specifying one 
+      port: config["server-port"], //
       host: config["server-host"],
       motd: `§a§lHypixel Dropper Proxy §7(Version ${this.version})\n§bTab stats and chunk caching added`,
       favicon: faviconText,
@@ -38,8 +38,8 @@ export class Proxy {
   bindEventListeners() {
     this.proxyServer.on("connection", client => {
       client.once("set_protocol", data => {
-        //check if newer than 1.20.1
-        if (client.protocolVersion > 763) {
+        //check if newer than 1.21.5
+        if (client.protocolVersion > 770) {
           client.incompatible = true
           if (data.nextState === 1) return
           console.log("A connection attempt was made with a newer Minecraft version than supported. " + supportedString)
@@ -65,7 +65,7 @@ export class Proxy {
           client.end("§cYou're using an unsupported Minecraft version.\n" + supportedString)
           return
         }
-        if (!["1.8", "1.11", "1.12", "1.14", "1.15", "1.16", "1.17", "1.18", "1.19", "1.20"].includes(versionData.version.majorVersion)) {
+        if (!["1.8", "1.11", "1.12", "1.14", "1.15", "1.16", "1.17", "1.18", "1.19", "1.20", "1.21"].includes(versionData.version.majorVersion)) {
           client.incompatible = true
           if (data.nextState === 1) return
           client.end("§cHypixel doesn't support this Minecraft version.\n" + supportedString)
@@ -93,7 +93,7 @@ export class Proxy {
 
   handlePing(response, client) {
     if (client.incompatible) {
-      response.version.name = "1.8-1.8.9, 1.11-1.12.2, 1.14-1.20.1"
+      response.version.name = "1.8-1.8.9, 1.11-1.12.2, 1.14-1.21.5" 
       response.version.protocol = -1
     }
     return response

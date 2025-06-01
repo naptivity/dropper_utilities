@@ -1,3 +1,10 @@
+config.yml
+configHandler.js
+data.json
+chunks.json
+
+
+
 # Logs
 logs
 *.log

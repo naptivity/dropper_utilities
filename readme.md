@@ -1,8 +1,11 @@
 # Hypixel Dropper Utilities
-This is a script that's like a mod for Dropper, adding a couple helpful features, but instead of going into your mods folder it acts as a proxy. This means you'll join a local server with this running, and it will sit between your Minecraft client and Hypixel.
+This is a node.js proxy that sits between your Minecraft client and Hypixel, designed to add convenient insights and features to dropper.
+This proxy was revived and expanded by naptivity! :3
 
-**Warning: Because this project automates chat/command functionality, there is a risk of getting muted or banned on Hypixel. It does not, however, give any in-game advantage. You may choose not to use any of those features (party chat commands, auto requeueing, and chunk caching) to stay safe.**
+**Warning: This project automates chat and commands which [can result in a mute or ban on Hypixel](https://hypixel.net/terms/#term-2). However, there is no in-game advantage, only quality of life improvements. You have full control over what features are enabled through the configuration file.**
 
+
+ This means you'll join a local server with this running, and it will sit between your Minecraft client and Hypixel.
 ## How to use (Standard and easiest method, Windows only)
 - Note: If you're not on Windows, please go to the next section and follow those instructions instead.
 - Download the file from [releases](https://github.com/LapisHusky/dropperutilities/releases) windows.exe.
@@ -52,12 +55,30 @@ This is a script that's like a mod for Dropper, adding a couple helpful features
 - `/trust add <user>` can be used to add a trusted user. Only trusted users can use most bot commands to prevent random users in the party from messing it up. The bot's operator (you) is always considered trusted and always has access to every command.
 - `/trust remove <user>` can be used to remove a trusted user.
 - `/trust list <user>` can be used to list trusted users.
-- `!takeownership` can be used by another trusted user to get ownership of the party. This is useful if you're the party owner and you're AFK, but a trusted user needs to do something like kick a player.
+- `!takeownership` can be used by a /trusted member of your party to become party owner. Useful in cases of AFK party hosts
+
 - View your current ping with `/ping`.
 - View measurements of the server's ticks-per-second with `/tps`.
 - Conveniently invite others to the dropper community Discord server with `/dl`.
 - Most commands that work as slash commands also work in party chat if you have enabled party chat commands with `/tc`. Commands in party chat begin with `!` instead of `/`. To view a list of party chat commands, use `!help`.
 - An experimental performance optimization which loads chunks from a cache instead of waiting for Hypixel to send them over the network. Enable with the chunk-caching option in config.yml. (Note: This is currently force disabled because Dropper's release introduced a new map layout with 4 different worlds.)
+
+## Todo (in order of priority):
+- Auto requeue when all players in the party have finished the game
+- Auto lobby hopping (/play arcade_dropper) based on player count in lobby, weighing past lobby options, and command cooldown restriction (bypassable?)
+  - 9+ players means stay imo at least for a simple algorithm
+- (Semi)auto report player API stats when joining a lobby to spot someone else who is running the game (or someone who's nicked) (and include gradually expiring cache to not overwhelm Hypixel API)
+- Auto voting, including auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
+- Track map times for performance measurement and allow viewing several performance insights through commands
+- Real time leaderboard based on player last seen positions (ambitious)
+
+
+
+## Random (learning node.js/JS in general)
+- https://stackoverflow.com/questions/48524417/should-the-package-lock-json-file-be-added-to-gitignore I already hate npm dependencies and this is my first time using them
+
+
+
 
 ## FAQ
 
@@ -68,7 +89,7 @@ Yes, simply don't activate party chat commands when you join the server, don't r
 You can edit the list in `config.yml` and restart the program.
 
 ### Why do I need to login?
-Minecraft's protocol is encrypted to help keep everyone secure. When you join a server like Hypixel, your client, Hypixel, and Mojang all agree to an encryption scheme. Nothing between you and Hypixel will be able to read what's being sent or modify it because of that encryption. In order for this proxy to work, it has to sit between you and Hypixel, and it has to decrypt and re-encrypt everything being sent. In order to re-encrypt everything going out to Hypixel, this needs to login to Hypixel. It can't do that unless you give it access.\
+Minecraft's protocol is encrypted to help keep everyone secure. When you join a server like Hypixel, your client, Hypixel, and Mojang all agree to an encryption scheme. Nothing between you and Hypixel will be able to read what's being sent or modify it because of that encryption. In order for this proxy to work, it has to sit between you and Hypixel, and it has to decrypt and re-encrypt everything being sent. In order to re-encrypt everything going out to Hypixel, this needs to login to Hypixel. It can't do that unless you give it access.
 Your login information is not sent to anything except Mojang/Microsoft. If you don't trust this code and can't review it yourself, don't run it.
 
 ### What versions does this support?

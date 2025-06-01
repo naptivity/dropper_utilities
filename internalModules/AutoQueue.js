@@ -1,4 +1,4 @@
-import { config } from "../config/configHandler.js"
+import { config } from "../configHandler.js"
 
 let perfectMapsLists = config["perfect-maps"]
 
