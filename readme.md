@@ -1,6 +1,6 @@
 # Hypixel Dropper Utilities
 This is a node.js proxy that sits between your Minecraft client and Hypixel, designed to add convenient insights and features to dropper.
-This proxy was revived and expanded by naptivity! :3
+[Original project by LapisHusky](https://github.com/LapisHusky/dropperutilities), revived, updated, and expanded by naptivity! :3
 
 **Warning: This project automates chat and commands which [can result in a mute or ban on Hypixel](https://hypixel.net/terms/#term-2). However, there is no in-game advantage, only quality of life improvements. You have full control over what features are enabled through the configuration file.**
 
