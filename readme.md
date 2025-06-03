@@ -66,6 +66,7 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
 ## Todo (in order of priority):
 - Auto requeue when all players in the party have finished the game
 - Auto requeue when lose
+  - If player about to win then requeue earlier to save time
 - Auto lobby hopping (/play arcade_dropper) based on player count in lobby, weighing past lobby options, and command cooldown restriction (bypassable?)
   - 9+ players means stay imo at least for a simple algorithm
   - On second thought, if no player has joined a lobby in a while, it means all players are getting dumped into another lobby, so maybe do analysis on Hypixel's server/player distribution algorithm and try to use that to determine whether a lobby will reach 12 soon enough
