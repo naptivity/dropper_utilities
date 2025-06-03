@@ -63,7 +63,7 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
 - Most commands that work as slash commands also work in party chat if you have enabled party chat commands with `/tc`. Commands in party chat begin with `!` instead of `/`. To view a list of party chat commands, use `!help`.
 - An experimental performance optimization which loads chunks from a cache instead of waiting for Hypixel to send them over the network. Enable with the chunk-caching option in config.yml. (Note: This is currently force disabled because Dropper's release introduced a new map layout with 4 different worlds.)
 
-## Todo (in order of priority):
+## Todo (roughly in order of priority):
 - Auto requeue when all players in the party have finished the game
 - Auto requeue when lose
   - If player about to win then requeue earlier to save time
@@ -71,6 +71,7 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
   - 9+ players means stay imo at least for a simple algorithm
   - On second thought, if no player has joined a lobby in a while, it means all players are getting dumped into another lobby, so maybe do analysis on Hypixel's server/player distribution algorithm and try to use that to determine whether a lobby will reach 12 soon enough
   - Alternatively just make it so that the rejoin spam cooldown resets whenever a player joins even if it's not known how long Hypixel waits to reroute players or whatever
+- Fix chunk caching (of course based on mapset)
 - (Semi)auto report player API stats (in chat or tab menu) to spot someone else who is running the game (or someone who's nicked) (and include gradually expiring cache to not overwhelm Hypixel API)
 - Auto voting, including auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
 - Track map times for performance measurement and allow viewing several performance insights through commands
@@ -80,6 +81,8 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
 - State win/completion ratio
 - Auto dodging when going for wins?
   - Lilith style conditional dodging in config file based on player API stats?
+- Auto hide players when starting game, including completely hide players for races or no pressure playing
+- Make a mode that makes everything barrier block or invis (like Hypixel bug that I keep having) so that you play blind to the map but based on memory basically equivalent to invis level in GD lmao
 
 
 
