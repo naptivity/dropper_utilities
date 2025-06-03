@@ -78,6 +78,7 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
 - Dodging if going for wins
 - State win/completion ratio
 - Auto dodging when going for wins?
+  - Lilith style conditional dodging in config file based on player API stats?
 
 
 
