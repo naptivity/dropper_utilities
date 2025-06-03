@@ -71,6 +71,10 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
 - Auto voting, including auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
 - Track map times for performance measurement and allow viewing several performance insights through commands
 - Real time leaderboard based on player last seen positions (ambitious)
+- Warning about new best level times being srcom performance worthy
+- Dodging if going for wins
+- State win/completion ratio
+- Auto dodging when going for wins?
 
 
 
