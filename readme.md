@@ -84,6 +84,7 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
 - Auto hide players when starting game, including completely hide players for races or no pressure playing
 - Make a mode that makes everything barrier block or invis (like Hypixel bug that I keep having) so that you play blind to the map but based on memory basically equivalent to invis level in GD lmao
 - Make sure multiple accounts/clients on the same pc can all join and also adapt auto voting to distribute voting between them 
+- Customizable MOTD/favicon?
 
 
 

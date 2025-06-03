@@ -1,6 +1,6 @@
 import { createServer } from "minecraft-protocol"  //minecraft-protocol is https://github.com/PrismarineJS/node-minecraft-protocol which is just the mc packet interfacing library
 import { ClientHandler } from "./ClientHandler.js" 
-import faviconText from "./favicon.js"
+import faviconText from "./favicon.js" //import base 64 encoded version of the favicon image
 import minecraftData from "minecraft-data"
 import { config } from "./configHandler.js" 
 
@@ -14,11 +14,11 @@ export class Proxy {
       "online-mode": true, //of course this is a legit mc server so online mode gotta be on
       keepAlive: false, //stops the proxy server from checking if the client is alive with keep alive packets, so it wont know when a client dcs
       version: false, //since this server should support several different versions obviously not specifying one 
-      port: config["server-port"], //
-      host: config["server-host"],
-      motd: `§a§lHypixel Dropper Proxy §7(Version ${this.version})\n§bTab stats and chunk caching added`,
-      favicon: faviconText,
-      hideErrors: true,
+      port: config["server-port"], //what port will be used to connect to localhost
+      host: config["server-host"], //honestly dont know what changing this would do
+      motd: `§a§lHypixel Dropper Proxy §7(Version ${this.version})\n§bTab stats and chunk caching added`, //ill change this to whatever
+      favicon: faviconText, //base  64 encoded version of the favicon image (should be changed, maybe add customizability including motd)
+      hideErrors: false, //true, //i want to debug
       beforePing: this.handlePing.bind(this)
     })
     this.clientId = 0
