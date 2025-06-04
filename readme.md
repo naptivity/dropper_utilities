@@ -1,9 +1,13 @@
 # Hypixel Dropper Utilities
-[Original project by LapisHusky](https://github.com/LapisHusky/dropperutilities). Revived, updated, and expanded by naptivity! :3
+[Original project by LapisHusky](https://github.com/LapisHusky/dropperutilities). Revived, updated, commented, and expanded by naptivity! :3
 
 This is a node.js proxy that sits between your Minecraft client and Hypixel, designed to add convenient features and insights to dropper. This works by having you join a local server that sits between your Minecraft client and Hypixel.
 
 **Warning: This project automates chat and commands which [can result in a mute or ban on Hypixel](https://hypixel.net/terms/#term-2). However, there is no in-game advantage, only quality of life improvements. You have full control over what features are enabled through the configuration file. Use at your own risk.**
+
+This is my first serious JS project undertaking, apologies for any bugs or bad programming I really tried :3
+
+Feedback is encouraged and appreciated!
 
 
 ## How to use (Standard and easiest method, Windows only)
@@ -63,7 +67,7 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
 - Most commands that work as slash commands also work in party chat if you have enabled party chat commands with `/tc`. Commands in party chat begin with `!` instead of `/`. To view a list of party chat commands, use `!help`.
 - An experimental performance optimization which loads chunks from a cache instead of waiting for Hypixel to send them over the network. Enable with the chunk-caching option in config.yml. (Note: This is currently force disabled because Dropper's release introduced a new map layout with 4 different worlds.)
 
-## Todo (roughly in order of priority):
+## Todo (SHOULD BE roughly in order of priority but it isn't):
 - Auto requeue when all players in the party have finished the game
 - Auto requeue when lose
   - If player about to win then requeue earlier to save time
@@ -76,7 +80,7 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
 - Auto voting, including auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
 - Track map times for performance measurement and allow viewing several performance insights through commands
 - Real time leaderboard based on player last seen positions (ambitious)
-- Warning about new best level times being srcom performance worthy
+- Warning about new best level times being srcom performance worthy (use srcom api)
 - Dodging if going for wins
 - State win/completion ratio
 - Auto dodging when going for wins?
@@ -85,11 +89,42 @@ This is a node.js proxy that sits between your Minecraft client and Hypixel, des
 - Make a mode that makes everything barrier block or invis (like Hypixel bug that I keep having) so that you play blind to the map but based on memory basically equivalent to invis level in GD lmao
 - Make sure multiple accounts/clients on the same pc can all join and also adapt auto voting to distribute voting between them 
 - Customizable MOTD/favicon?
+- Test all different possible versions and multiple accounts to prevent bug oversights:
+  - 1.20.1
+- Clean up readme
 
 
 
 ## Random (learning node.js/JS in general)
-- https://stackoverflow.com/questions/48524417/should-the-package-lock-json-file-be-added-to-gitignore I already hate npm dependencies and this is my first time using them
+- https://stackoverflow.com/questions/48524417/should-the-package-lock-json-file-be-added-to-gitignore I already hate npm dependencies and this is my first time using them (see package-lock.json progress below)
+
+
+## Commenting Progress
+My goal before tackling the todo list is to go through every single file in here and excessively (yes, I mean VERY excessively you can go look for yourself) comment/understand the code while clearing it up, allowing me to be very familiar with the code before I start messing with stuff. Recall that this is my first time doing a major program in JS, so this is helpful to iron out language specific nuances (you can see me point some of these out in comments). <strong>Once I finish the first pass I plan to review everything one more time briefly and ensure I didn't miss anything or mmisunderstand anything.</strong> I do however need to track my progress in commenting/understanding the files, so here it is:
+
+Round 2 later once everything has had one pass
+
+Round 1 done:
+- index.js
+- defaultConfig.js
+- configHandler.js
+- favicon.js (lol)
+- hideWarning.js
+
+Round 1 WIP:
+- Proxy.js (figure out removeClientHandler & handlePing)
+- ClientHandler.js
+- package.json (why is axios overridden what even is axios)
+- package-lock.json (does this prevent dependency upgrades from breaking shit, see Random title above)
+
+Round 1 TBD:
+- utils directory
+- mojangApi directory
+- internalModules directory
+- dropperApi directory
+- data directory
+- commands directory
+
 
 
 

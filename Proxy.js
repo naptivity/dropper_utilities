@@ -2,102 +2,87 @@ import { createServer } from "minecraft-protocol"  //minecraft-protocol is https
 import { ClientHandler } from "./ClientHandler.js" 
 import faviconText from "./favicon.js" //import base 64 encoded version of the favicon image
 import minecraftData from "minecraft-data"
-import { config } from "./configHandler.js" 
+import { config } from "./configHandler.js" //import all the variables 
 
-const supportedString = "Please use 1.8.9 or 1.19-1.21.5"
+const supportedString = "1.8-1.8.9 and 1.19-1.21.5"
 
-export class Proxy {
+//https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/docs/API.md
+export class Proxy { //remember that export is what makes objects methods and variables importable by other sections of the program so this class is only actually imported and run in index.js
   constructor() {
     this.version = "2.0.0" //i feel like all the changes im making and the fact im revamping a 2 year old program deserves a 2.0
 
-    this.proxyServer = createServer({
+    //this object is the actual local proxy server that you connect to instead of hypixel
+    this.proxyServer = createServer({ 
       "online-mode": true, //of course this is a legit mc server so online mode gotta be on
       keepAlive: false, //stops the proxy server from checking if the client is alive with keep alive packets, so it wont know when a client dcs
       version: false, //since this server should support several different versions obviously not specifying one 
       port: config["server-port"], //what port will be used to connect to localhost
       host: config["server-host"], //honestly dont know what changing this would do
-      motd: `§a§lHypixel Dropper Proxy §7(Version ${this.version})\n§bTab stats and chunk caching added`, //ill change this to whatever
-      favicon: faviconText, //base  64 encoded version of the favicon image (should be changed, maybe add customizability including motd)
-      hideErrors: false, //true, //i want to debug
-      beforePing: this.handlePing.bind(this)
+      motd: '§a§lHypixel Dropper Proxy §7(Version ' + this.version + ')\n§bTab stats and chunk caching added', //ill change this to whatever
+      favicon: faviconText, //base 64 encoded version of the favicon image (should be changed, maybe add customizability including motd)
+      hideErrors: false, //true, //i want to debug so false
+      beforePing: this.handlePing.bind(this) //calls function to handle ping check, pretty much just to check the version and make sure its compatible, kicking if not
     })
-    this.clientId = 0
-    this.clients = new Map()
-
-    this.destroyed = false
+    this.clientId = 0 //client id is to allow multiple accounts to join, having a different clienthandler instance created for every account
+    this.clients = new Map() //a map is pretty much a dictionary/hashmap, so we store every client as a clientid : clienthandler instance pair in this map
     
-    this.bindEventListeners()
+    this.bindEventListeners() //enable event listeners that will listen to events happening in the proxyserver object
   }
 
-  destroy() {
-    if (this.destroyed) return
-    this.destroyed = true
+
+  destroy() { //used from index.js to stop proxy on error
     this.proxyServer.close()
   }
 
+
   bindEventListeners() {
-    this.proxyServer.on("connection", client => {
-      client.once("set_protocol", data => {
-        //check if newer than 1.21.5
-        if (client.protocolVersion > 770) {
+    this.proxyServer.on("listening", () => { //happens when the server first starts listening for incoming connections
+      let port = (config["server-port"] == "25565") ? "" : ':' + config["server-port"] //determines if the console message should add a port after localhost if its not the default port
+      console.log("Proxy started. You may now join \"localhost" + port + "\" in Minecraft. Keep this program open in the background.")
+    })
+
+    this.proxyServer.on("connection", client => { //when a player tries to connect, run this function that is passed client object with info about client trying to connect (primarily the protocolversion)
+      //version checking to make sure version falls in the range
+      client.once("set_protocol", data => { //once is basically on but only triggers the next time event is emitted
+        if (data.nextState === 1) return //(according to gpt) 1 means its just a ping, 2 means its a login, so ignore the version check if just a ping
+        if (client.protocolVersion !== 47 && (client.protocolVersion < 759 || client.protocolVersion > 770)) { //check if not within supportedstring protocol versions
           client.incompatible = true
-          if (data.nextState === 1) return
-          console.log("A connection attempt was made with a newer Minecraft version than supported. " + supportedString)
-          client.end("§cYou're using a newer Minecraft version than currently supported.\n" + supportedString)
-          return
-        }
-        //check if older than 1.8
-        if (client.protocolVersion < 47) {
-          client.incompatible = true
-          if (data.nextState === 1) return
-          console.log("A connection attempt was made with an older Minecraft version than supported. " + supportedString)
-          client.end("§cYou're using an older Minecraft version than currently supported.\n" + supportedString)
-          return
-        }
-      
-        let versionData = minecraftData(client.protocolVersion)
-        if (versionData) {
-          client.minecraftVersion = versionData.version.minecraftVersion
-        } else {
-          client.incompatible = true
-          if (data.nextState === 1) return
-          console.log("A connection attempt was made with an unsupported Minecraft version. " + supportedString)
-          client.end("§cYou're using an unsupported Minecraft version.\n" + supportedString)
-          return
-        }
-        if (!["1.8", "1.11", "1.12", "1.14", "1.15", "1.16", "1.17", "1.18", "1.19", "1.20", "1.21"].includes(versionData.version.majorVersion)) {
-          client.incompatible = true
-          if (data.nextState === 1) return
-          client.end("§cHypixel doesn't support this Minecraft version.\n" + supportedString)
+          let versionData = minecraftData(client.protocolVersion).version.minecraftVersion //gets the correct minecraft-data database info for the protocol version then looks specifically for the corresponding version string 
+          console.log("A connection attempt was made with an unsupported Minecraft version.\n" + "Hypixel's supported versions are " + supportedString + ", while you are on " + versionData)
+          client.end("§cA connection attempt was made with an unsupported Minecraft version.\n" + "§cHypixel's supported versions are " + supportedString + ", while you are on " + versionData)
           return
         }
       })
     })
-    this.proxyServer.on("login", userClient => {
-      let handler = new ClientHandler(userClient, this, this.clientId)
-      this.clients.set(this.clientId, handler)
-      this.clientId++
+
+    this.proxyServer.on("login", userClient => { //happens when a player actually logs into the server
+      // console.log(userClient) 
+      this.clients.set(this.clientId, new ClientHandler(userClient, this, this.clientId)) //create a new instance of the client class that will connect to hypixel with the microsoft credentials, and add it to the map of all clients on the proxy 
+      this.clientId++ //increase the client id so any other player that joins has a unique key
     })
-    this.proxyServer.on("error", error => {
-      if (error.code === "EADDRINUSE") {
-        console.log("Proxy was unable to start, port 25565 is already in use.")
-        console.log("Make sure you don't have this already open in another window, and make sure you don't have any real Minecraft servers running on your computer.")
-      } else {
+
+    this.proxyServer.on("error", error => { //happens if the proxy has an error
+      if (error.code === "EADDRINUSE") { //error that happens if port is being used by a pre-existing process (likely another instance of the program or another minecraft server on the machine)
+        console.log("Proxy was unable to start, port " + config["server-port"] + " is already in use.")
+        console.log("Make sure you don't have this already open in another window, and make sure you don't have any other Minecraft servers running on your computer on the same port.")
+        console.log("Then try running this program again.")
+      }
+      else {
         throw error
       }
     })
-    this.proxyServer.on("listening", () => {
-      console.log("Proxy started. You may now join localhost in Minecraft. Keep this window open in the background.")
-    })
+
   }
+
 
   handlePing(response, client) {
     if (client.incompatible) {
-      response.version.name = "1.8-1.8.9, 1.11-1.12.2, 1.14-1.21.5" 
+      response.version.name = "1.8-1.8.9, 1.19-1.21.5" 
       response.version.protocol = -1
     }
     return response
   }
+
 
   removeClientHandler(id) {
     this.clients.delete(id)
