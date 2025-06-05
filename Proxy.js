@@ -1,10 +1,10 @@
 import { createServer } from "minecraft-protocol"  //minecraft-protocol is https://github.com/PrismarineJS/node-minecraft-protocol which is just the mc packet interfacing library
-import { ClientHandler } from "./ClientHandler.js" 
+import { ClientHandler } from "./ClientHandler.js" //class that creates a minecraft client that connects to hypixel
 import faviconText from "./favicon.js" //import base 64 encoded version of the favicon image
-import minecraftData from "minecraft-data"
+import minecraftData from "minecraft-data" //contains all minecraft metadata and stuff, only used to convert protocol version to normal version in this case
 import { config } from "./configHandler.js" //import all the variables 
 
-const supportedString = "1.8-1.8.9 and 1.19-1.21.5"
+const supportedString = "1.8-1.8.9 and 1.19-1.21.4" //not 1.21.5 yet because node-minecraft-protocol doesnt support it
 
 //https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/docs/API.md
 export class Proxy { //remember that export is what makes objects methods and variables importable by other sections of the program so this class is only actually imported and run in index.js
@@ -21,7 +21,9 @@ export class Proxy { //remember that export is what makes objects methods and va
       motd: '§a§lHypixel Dropper Proxy §7(Version ' + this.version + ')\n§bTab stats and chunk caching added', //ill change this to whatever
       favicon: faviconText, //base 64 encoded version of the favicon image (should be changed, maybe add customizability including motd)
       hideErrors: false, //true, //i want to debug so false
-      beforePing: this.handlePing.bind(this) //calls function to handle ping check, pretty much just to check the version and make sure its compatible, kicking if not
+      debug: true, //turn off after finished debugging
+      beforePing: this.handlePing.bind(this) //calls function to handle serverlist ping, pretty much just to show the right versions on the serverlist if compatible
+      //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind for what bind does, basically just ensures that handlePing gets called within the scope of this proxy class object
     })
     this.clientId = 0 //client id is to allow multiple accounts to join, having a different clienthandler instance created for every account
     this.clients = new Map() //a map is pretty much a dictionary/hashmap, so we store every client as a clientid : clienthandler instance pair in this map
@@ -42,13 +44,13 @@ export class Proxy { //remember that export is what makes objects methods and va
     })
 
     this.proxyServer.on("connection", client => { //when a player tries to connect, run this function that is passed client object with info about client trying to connect (primarily the protocolversion)
+      // console.log(client)
       //version checking to make sure version falls in the range
       client.once("set_protocol", data => { //once is basically on but only triggers the next time event is emitted
         if (data.nextState === 1) return //(according to gpt) 1 means its just a ping, 2 means its a login, so ignore the version check if just a ping
-        if (client.protocolVersion !== 47 && (client.protocolVersion < 759 || client.protocolVersion > 770)) { //check if not within supportedstring protocol versions
-          client.incompatible = true
+        if (!this.compatibleVersion(client.protocolVersion)) { //
           let versionData = minecraftData(client.protocolVersion).version.minecraftVersion //gets the correct minecraft-data database info for the protocol version then looks specifically for the corresponding version string 
-          console.log("A connection attempt was made with an unsupported Minecraft version.\n" + "Hypixel's supported versions are " + supportedString + ", while you are on " + versionData)
+          console.log("\nA connection attempt was made with an unsupported Minecraft version.\n" + "Hypixel's supported versions are " + supportedString + ", while you are on " + versionData)
           client.end("§cA connection attempt was made with an unsupported Minecraft version.\n" + "§cHypixel's supported versions are " + supportedString + ", while you are on " + versionData)
           return
         }
@@ -75,16 +77,22 @@ export class Proxy { //remember that export is what makes objects methods and va
   }
 
 
+  compatibleVersion(protocolVersion) { //simple check to see if given protocolversion not within supportedstring protocol versions
+    return (protocolVersion == 47 || (protocolVersion >= 759 && protocolVersion <= 769)) //equals 1.8-1.8.9 or between 1.19-1.21.4
+  }
+
+
   handlePing(response, client) {
-    if (client.incompatible) {
-      response.version.name = "1.8-1.8.9, 1.19-1.21.5" 
-      response.version.protocol = -1
+    // console.log(client.protocolVersion, this.compatibleVersion(client.protocolVersion))
+    if (!this.compatibleVersion(client.protocolVersion)) {
+      response.version.name = supportedString 
+      response.version.protocol = -1 //causes the server to show red incompatible version with above string
     }
     return response
   }
 
 
-  removeClientHandler(id) {
+  removeClientHandler(id) { //function that just deletes a specified clienthandler object in the client map, called by the clienthandler object itself when destroying/exiting game
     this.clients.delete(id)
   }
 }

@@ -89,8 +89,12 @@ Feedback is encouraged and appreciated!
 - Make a mode that makes everything barrier block or invis (like Hypixel bug that I keep having) so that you play blind to the map but based on memory basically equivalent to invis level in GD lmao
 - Make sure multiple accounts/clients on the same pc can all join and also adapt auto voting to distribute voting between them 
 - Customizable MOTD/favicon?
-- Test all different possible versions and multiple accounts to prevent bug oversights:
+- Test all different possible versions and multiple accounts to prevent bug oversights (nothing means it worked):
+  - 1.8.9
   - 1.20.1
+  - 1.20.2, 1.20.6, 1.21 FAILED (working on it)
+  - 1.21.4 FAILED (clienthandler issue likely)
+  - 1.21.5 UNSUPPORTED BY node-minecraft-protocol
 - Clean up readme
 
 
@@ -118,6 +122,7 @@ Round 1 WIP:
 - package-lock.json (does this prevent dependency upgrades from breaking shit, see Random title above)
 
 Round 1 TBD:
+- yarn.lock (no clue what it does)
 - utils directory
 - mojangApi directory
 - internalModules directory

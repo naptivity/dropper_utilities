@@ -1,6 +1,10 @@
 config.yml
 data.json
 chunks.json
+packets.txt
+.vscode
+
+
 
 
 

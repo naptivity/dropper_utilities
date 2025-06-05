@@ -1,5 +1,7 @@
 import prismarineChunkModule from "prismarine-chunk"
 import Vec3 from "vec3"
+import minecraftData from "minecraft-data" //contains all minecraft metadata and stuff, only used to convert protocol version to normal version in this case
+
 
 export class WorldTracker {
   constructor(clientHandler) {
@@ -10,7 +12,7 @@ export class WorldTracker {
     this.usesUnloadPacket = this.userClient.protocolVersion >= 107
     this.usesLargeChunks = this.userClient.protocolVersion >= 757
     this.usesNewPortalName = this.userClient.protocolVersion >= 393
-    this.PrismarineChunk = prismarineChunkModule(this.userClient.minecraftVersion)
+    this.PrismarineChunk = prismarineChunkModule(minecraftData(this.userClient.protocolVersion).version.minecraftVersion) //uses minecraft data to reliably convert protocolversion to a real version number (previous method of userClient.minecraftVersion would break 1.8 because that property didnt exist in older version clients)
 
     this.chunks = new Map()
 
