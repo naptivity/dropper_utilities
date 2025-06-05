@@ -136,7 +136,8 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
       if (meta.state !== states.PLAY) return
       if (replaced) {
         userClient.write(meta.name, data) //forwards edited hypixel server packet to real minecraft client through our local proxy
-      } else {
+      }
+      else {
         userClient.writeRaw(buffer) //forwards unedited hypixel server packet to real minecraft client through our local proxy
       }
     })

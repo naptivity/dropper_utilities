@@ -120,6 +120,7 @@ Round 1 WIP:
 - ClientHandler.js
 - package.json (why is axios overridden what even is axios)
 - package-lock.json (does this prevent dependency upgrades from breaking shit, see Random title above)
+- commands/handler.js (used in index.js for whatever reason)
 
 Round 1 TBD:
 - yarn.lock (no clue what it does)
