@@ -32,11 +32,13 @@ export class AutoQueue {
     let list = perfectMapsLists[config]
     if (list) {
       status = "success"
-    } else {
+    }
+    else {
       list = perfectMapsLists.default
       if (config) {
         status = "invalid"
-      } else {
+      }
+      else {
         status = "noinput"
       }
     }
@@ -53,7 +55,8 @@ export class AutoQueue {
       this.endRequeueTimeout()
       this.requeueAfterTime = false
       this.requeueOnFinish = false
-    } else if (type === "time") {
+    }
+    else if (type === "time") {
       this.endRequeueTimeout()
       this.requeueAfterTime = true
       this.requeueOnFinish = false
@@ -64,7 +67,8 @@ export class AutoQueue {
         //requeue after requeueTime - timeElapsed
         }, this.reQueueTime - (performance.now() - this.stateHandler.startTime))
       }
-    } else if (type === "finish") {
+    }
+    else if (type === "finish") {
       this.endRequeueTimeout()
       this.requeueAfterTime = false
       this.requeueOnFinish = true

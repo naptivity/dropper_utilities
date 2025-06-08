@@ -15,10 +15,13 @@ export class CustomCommands {
 
   handleOutgoingPacket(data, meta) {
     if (meta.name === "chat_command") {
+      // console.log(data.command)
       let isCommand = handleCommand(this.clientHandler, data.command, this.userClient.trimmedUUID, "slash", this.clientHandler.proxy)
+      // console.log("isCommand: " + isCommand)
       if (isCommand) return {
         type: "cancel"
       }
+      
     }
     if (meta.name === "chat") {
       let trim = data.message.trim()

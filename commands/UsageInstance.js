@@ -63,11 +63,13 @@ export class UsageInstance {
       this.clientHandler.sendClientMessage({
         text: `§9DropperUtilities > §r${text}`
       })
-    } else if (this.source === "party") {
+    }
+    else if (this.source === "party") {
       if (this.clientHandler.destroyed) return
       text = removeFormattingCodes(text)
       this.clientHandler.partyChatThrottle.addToQueue("/pc " + text)
-    } else if (this.source === "console") {
+    }
+    else if (this.source === "console") {
       //TODO: translate to ANSI color codes for console
       text = removeFormattingCodes(text)
       console.log(text)

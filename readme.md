@@ -78,17 +78,18 @@ Feedback is encouraged and appreciated!
 - Fix chunk caching (of course based on mapset)
 - (Semi)auto report player API stats (in chat or tab menu) to spot someone else who is running the game (or someone who's nicked) (and include gradually expiring cache to not overwhelm Hypixel API)
 - Auto voting, including auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
+- Make sure multiple accounts/clients on the same pc can all join and also adapt auto voting to distribute voting between them (same as above just local without using party chat)
 - Track map times for performance measurement and allow viewing several performance insights through commands
 - Real time leaderboard based on player last seen positions (ambitious)
 - Warning about new best level times being srcom performance worthy (use srcom api)
-- Dodging if going for wins
 - State win/completion ratio
 - Auto dodging when going for wins?
   - Lilith style conditional dodging in config file based on player API stats?
-- Auto hide players when starting game, including completely hide players for races or no pressure playing
-- Make a mode that makes everything barrier block or invis (like Hypixel bug that I keep having) so that you play blind to the map but based on memory basically equivalent to invis level in GD lmao
-- Make sure multiple accounts/clients on the same pc can all join and also adapt auto voting to distribute voting between them 
+  - For now just requeue if someone finishes map (whether its you or not)
+- Auto hide players when starting game, maybe also including completely hide players (in waiting lobby) for races or playing without competitive pressure 
+- Make a mode that makes everything barrier block or invis (like Mineshaft Hypixel bug) so that you play blind to the map but based on memory basically equivalent to invis level in GD lmao
 - Customizable MOTD/favicon?
+- Sync proxy server list playercount to number of people online on dropper https://minecraft.wiki/w/Java_Edition_protocol/Server_List_Ping
 - Test all different possible versions and multiple accounts to prevent bug oversights (nothing means it worked):
   - 1.8.9
   - 1.20.1

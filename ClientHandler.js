@@ -13,10 +13,12 @@ import { ServerAgeTracker } from "./internalModules/ServerAgeTracker.js"
 import { CustomModules } from "./internalModules/CustomModules.js"
 import { ChunkPreloader } from "./internalModules/ChunkPreloader.js"
 import { TabListHandler } from "./internalModules/TabListHandler.js"
+import { AutoVote } from "./internalModules/AutoVote.js"
 import { random64BitBigInt } from "./utils/utils.js"
 
 import fs from "fs" //for writing packets to a file for easier viewing
-fs.writeFileSync("./packets.txt", "")
+
+
 
 export class ClientHandler extends EventEmitter { //basically just allow the class to .emit event
   constructor(userClient, proxy, id) {
@@ -48,29 +50,41 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
     //due to issues with chunk parsing on 1.18, this does not currently support tick counting on 1.18.
     this.disableTickCounter = userClient.protocolVersion >= 757
 
-    //------------------------------------------------------------------
-    // if (!this.disableTickCounter) this.worldTracker = new WorldTracker(this)
-    // this.stateHandler = new StateHandler(this)
-    // if (!this.disableTickCounter) {
-    //   this.tickCounter = new TickCounter(this)
-    //   this.stateHandler.bindTickCounter()
-    // }
-    // //previously used just for party chat, now it throttles every party command
-    // this.partyChatThrottle = new PartyChatThrottle(this)
-    // this.customCommands = new CustomCommands(this)
-    // this.autoQueue = new AutoQueue(this)
-    // this.partyCommands = new PartyCommands(this)
-    // this.timeDetail = new TimeDetail(this)
-    // this.betterGameInfo = new BetterGameInfo(this)
-    // this.serverAgeTracker = new ServerAgeTracker(this)
-    // this.chunkPreloader = new ChunkPreloader(this)
-    // this.customModules = new CustomModules(this)
-    // this.tabListHandler = new TabListHandler(this)
-    //------------------------------------------------------------------
+    // ------------------------------------------------------------------
+    if (!this.disableTickCounter) this.worldTracker = new WorldTracker(this)
+    this.stateHandler = new StateHandler(this)
+    if (!this.disableTickCounter) {
+      this.tickCounter = new TickCounter(this)
+      this.stateHandler.bindTickCounter()
+    }
+    //previously used just for party chat, now it throttles every party command
+    this.partyChatThrottle = new PartyChatThrottle(this)
+    this.customCommands = new CustomCommands(this)
+    this.autoQueue = new AutoQueue(this)
+    this.partyCommands = new PartyCommands(this)
+    this.timeDetail = new TimeDetail(this)
+    this.betterGameInfo = new BetterGameInfo(this)
+    this.serverAgeTracker = new ServerAgeTracker(this)
+    this.chunkPreloader = new ChunkPreloader(this)
+    this.customModules = new CustomModules(this)
+    this.tabListHandler = new TabListHandler(this)
+    this.autoVote = new AutoVote(this)
+    // ------------------------------------------------------------------
 
+    this.logPackets = false
+    this.packetFilter = ["boss_bar", "ping", "pong", "keep_alive", "scoreboard_objective", "position",
+                          "update_time", "entity_head_rotation", "entity_move_look", "rel_entity_move",
+                          "sound_effect", "entity_teleport", "entity_metadata", "entity_update_attributes",
+                          "teams", "look", "acknowledge_player_digging"]
+    // this.withholdPackets = ["set_slot", ]
+    this.clearPacketLogs()
     console.log(userClient.username + " connected to the proxy")
 
     this.bindEventListeners()
+  }
+
+  clearPacketLogs() {
+    fs.writeFileSync("./packets.txt", "")
   }
 
   destroy() {
@@ -84,18 +98,21 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
     let userClient = this.userClient
     let proxyClient = this.proxyClient
 
-    userClient.on("packet", (data, meta, buffer) => { //happens when recieving a packet from the USER (the real minecraft client)
-      fs.appendFileSync("./packets.txt",
-        "\n\n\n\n\n\n\n\nUSERCLIENT - OUTGOING\n\n" +
-        "DATA\n" + JSON.stringify(data, null, 2) +"\n\n" +
-        "META\n" + JSON.stringify(meta, null, 2) + "\n\n" +
-        "BUFFER\n" + buffer.toString("hex"))
+    userClient.on("packet", (data, meta, buffer) => { //happens when recieving a packet from the USER (sent by the real minecraft client)
+      if (this.logPackets && !this.packetFilter.includes(meta.name)) {
+        fs.appendFileSync("./packets.txt",
+          "\n\n\n\n\n\n\n\nUSERCLIENT (SERVERBOUND/OUTGOING) - " + meta.state + " | " + meta.name + "\n\n" +
+          "DATA\n" + JSON.stringify(data, null, 2) +"\n\n" +
+          "META\n" + JSON.stringify(meta, null, 2) + "\n\n" +
+          "BUFFER\n" + buffer.toString("hex"))
+        // console.log("\n\nUSERCLIENT (SERVERBOUND/OUTGOING) - " + meta.state + " | " + meta.name)
+      }
       let replaced = false
       for (let modifier of this.outgoingModifiers) {
         let result = modifier(data, meta)
         if (result) {
           let type = result.type
-          if (type === "cancel") {
+          if (type === "cancel") { //completely drops packet instead of forwarding it to hypixel
             return
           }
           else if (type === "replace") {
@@ -113,12 +130,16 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
       }
     })
 
-    proxyClient.on("packet", (data, meta, buffer) => { //happens when recieving a packet from hypixel (sent to our fake minecraft client)
-      fs.appendFileSync("./packets.txt",
-        "\n\n\n\n\n\n\n\nPROXYCLIENT - INCOMING\n\n" +
-        "DATA\n" + JSON.stringify(data, null, 2) +"\n\n" +
-        "META\n" + JSON.stringify(meta, null, 2) + "\n\n" +
-        "BUFFER\n" + buffer.toString("hex"))
+    proxyClient.on("packet", (data, meta, buffer) => { //happens when recieving a packet from hypixel (sent to the fake minecraft client)
+      if (this.logPackets && !this.packetFilter.includes(meta.name)) {
+        fs.appendFileSync("./packets.txt",
+          "\n\n\n\n\n\n\n\nPROXYCLIENT (CLIENTBOUND/INCOMING) - " + meta.state + " | " + meta.name + "\n\n" +
+          "DATA\n" + JSON.stringify(data, null, 2) +"\n\n" +
+          "META\n" + JSON.stringify(meta, null, 2) + "\n\n" +
+          "BUFFER\n" + buffer.toString("hex"))
+        // console.log("\n\nPROXYCLIENT (CLIENTBOUND/INCOMING) - " + meta.state + " | " + meta.name)
+        // if (this.withholdPackets.includes(meta.name)) return
+      }
       let replaced = false
       for (let modifier of this.incomingModifiers) {
         let result = modifier(data, meta)
@@ -202,6 +223,43 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
       })
     }
   }
+
+
+  sendServerCommand(content) {
+    if (this.userClient.protocolVersion < 759) {
+      this.proxyClient.write("chat", {
+        message: "/" + content
+      })
+    } else if (this.userClient.protocolVersion < 760) {
+      this.proxyClient.write("chat_command", {
+        command: content,
+        timestamp: BigInt(Date.now()),
+        salt: 0n,
+        argumentSignatures: [],
+        signedPreview: false
+      })
+    } else if (this.userClient.protocolVersion < 761) {
+      this.proxyClient.write("chat_command", {
+        command: content,
+        timestamp: BigInt(Date.now()),
+        salt: random64BitBigInt(),
+        argumentSignatures: [],
+        signedPreview: false,
+        previousMessages: [],
+        lastRejectedMessage: undefined
+      })
+    } else {
+      this.proxyClient.write("chat_command", {
+        command: content,
+        timestamp: BigInt(Date.now()),
+        salt: random64BitBigInt(),
+        argumentSignatures: [],
+        messageCount: 0,
+        acknowledged: Buffer.alloc(3)
+      })
+    }
+  }
+
 
 
   sendServerCommand(content) {
