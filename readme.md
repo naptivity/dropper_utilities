@@ -96,7 +96,7 @@ Feedback is encouraged and appreciated!
   - 1.20.2, 1.20.6, 1.21 FAILED (working on it)
   - 1.21.4 FAILED (clienthandler issue likely)
   - 1.21.5 UNSUPPORTED BY node-minecraft-protocol
-- Clean up readme
+- Clean up readme BY MOVING EACH ATROCIOUSLY LONG SECTION OF IT INTO ITS OWN MARKDOWN FILE 
 
 
 
