@@ -43,6 +43,7 @@
 - Sync proxy server list playercount to number of people online on dropper https://minecraft.wiki/w/Java_Edition_protocol/Server_List_Ping
 - Test all different possible versions and multiple accounts to prevent bug oversights (nothing means it worked):
   - 1.8.9
+  - 1.19.4
   - 1.20.1
   - 1.20.2, 1.20.6, 1.21 FAILED (working on it)
   - 1.21.4 FAILED (clienthandler issue likely)
