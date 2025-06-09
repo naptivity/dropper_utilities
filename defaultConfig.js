@@ -21,6 +21,16 @@ perfect-maps:
     - Well, Balloons, Sewer, Floating Islands, Iris
     - Well, Balloons, Floating Islands, Sewer, Iris
 
+auto-vote-maps:
+  fantasy:
+    - Well, King's Pass, Beanstalk, Warportal, Hell Gate
+  abstract:
+    - Vintage, BBQ, Emoji, Painted, Bird Cage
+  landscape:
+    - Kraken, Lily, Glacier, Ravine, Frogspawn
+  futuristic:
+    - Warp, Sewer, UFO, City, Gears
+
 # Displayed in the discordlink command. Change if you wish.
 discord-link: https://discord.gg/Sqbj9Nb835
 

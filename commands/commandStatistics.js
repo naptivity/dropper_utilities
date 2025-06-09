@@ -1,6 +1,6 @@
 import { getPlayerStats } from "../dropperApi/fullStats.js"
 import { formatTime } from "../utils/utils.js"
-import { mapDifficulties } from "../utils/mapDifficulties.js"
+// import { mapDifficulties } from "../utils/mapDifficulties.js"
 
 export const name = "statistics"
 export const aliases = ["dropperstats", "dstats"]
@@ -30,7 +30,7 @@ export async function run(usageInstance) {
     message += `§7, Fastest Time: §a${formatTime(playerStats.fastestGame)}`
   }
   usageInstance.clientHandler.sendClientMessage(message)
-  return //map stats are too big
+  return //map stats are too big //and now theyre broken cuz i broke the map diff file lol
   if (playerStats.maps.length === 0) {
     usageInstance.clientHandler.sendClientMessage("§9DropperUtilities > §7No map statistics recorded yet.")
     return

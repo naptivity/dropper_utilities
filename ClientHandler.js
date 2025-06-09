@@ -225,6 +225,15 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
   }
 
 
+  sendCustomServerPacket(meta_name, data) {
+    this.proxyClient.write(meta_name, data)
+  }
+
+  sendCustomClientPacket(meta_name, data) {
+    this.userClient.write(meta_name, data)
+  }
+
+
   sendServerCommand(content) {
     if (this.userClient.protocolVersion < 759) {
       this.proxyClient.write("chat", {
