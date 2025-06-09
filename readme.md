@@ -3,7 +3,7 @@
 
 This is a node.js proxy that sits between your Minecraft client and Hypixel, designed to add convenient features and insights to dropper. This works by having you join a local server that sits between your Minecraft client and Hypixel.
 
-<strong>Supports versions 1.8-1.8.9 and 1.19-1.20.1.</strong> 1.9-1.18.2 are not supported because Hypixel doesn't support them.
+<strong>Supports versions 1.8-1.8.9 and 1.19-1.20.1.</strong> Versions 1.9-1.18.2 are not supported because Hypixel doesn't support them.
 
 **Warning: This project automates chat, commands, and packets, which [can result in a mute or ban on Hypixel](https://hypixel.net/terms/#term-2). However, there is no in-game advantage, only quality of life improvements. You have full control over what features are enabled through the configuration file. Use at your own risk.**
 
