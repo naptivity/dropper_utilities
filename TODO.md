@@ -8,6 +8,8 @@
 - Auto voting, including auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
   - Make sure multiple accounts/clients on the same pc can all join and also adapt auto voting to distribute voting between them (same as above just local without using party chat)
 
+  - Depend on StateHandler for determining when joined a lobby and also finding out mapset
+
 
 - Auto requeue when all players in the party have finished the game
 - Auto requeue when lose
