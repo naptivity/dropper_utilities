@@ -8,7 +8,10 @@
 - Auto voting, including auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
   - Make sure multiple accounts/clients on the same pc can all join and also adapt auto voting to distribute voting between them (same as above just local without using party chat)
 
-  - Depend on StateHandler for determining when joined a lobby and also finding out mapset
+  - Depend on StateHandler for finding out mapset?
+  - Check after every window_click packet to confirm auto vote went thru if not close window and try again later but all without user input, rn it just blindly tries (vote validation)
+  - Allow user to open the gui after the auto vote goes thru or keep right click map as just a retry? idk
+  - Buffer movement packets (and more?) while in menu to ensure no ban due to invmove hack detection (although not an issue currently but vote validation not implemented yet)
 
 
 - Auto requeue when all players in the party have finished the game
@@ -17,8 +20,10 @@
   - Lilith style conditional dodging in config file based on player API stats?
   - For now just requeue if someone finishes map (whether its you or not)
 
+- Dropper API
+  - (Semi)auto report player API stats (in chat or tab menu) to spot someone else who is running the game (or someone who's nicked) (and include gradually expiring cache to not overwhelm Hypixel API)
+  - State win/completion ratios
 
-- (Semi)auto report player API stats (in chat or tab menu) to spot someone else who is running the game (or someone who's nicked) (and include gradually expiring cache to not overwhelm Hypixel API)
 
 
 - Auto lobby hopping (/play arcade_dropper) based on player count in lobby, weighing past lobby options, and command cooldown restriction (bypassable?)
@@ -28,19 +33,34 @@
 
 
 - Fix chunk caching (of course based on mapset)
-- Track map times for performance measurement and allow viewing several performance insights through commands
+
+
+- Track and save map times for performance measurement and allow viewing several performance insights through commands
+
+
 - Real time leaderboard based on player last seen positions (ambitious)
+
+
 - Warning about new best level times being srcom performance worthy (use srcom api w/ caching)
-- State win/completion ratio
+
+
+- Add reset config file on next reboot option either in config file or in cli commands
 
 
 - Make config file have control for ever feature being enabled or not (as promised in the warning)
 
 
+- Prettier serverlist look
+  - Customizable MOTD/favicon?
+  - Sync proxy server list playercount to number of people online on dropper https://minecraft.wiki/w/Java_Edition_protocol/Server_List_Ping
+
+
 - Auto hide players when starting game, maybe also including completely hide players (in waiting lobby) for races or playing without competitive pressure 
+
+
 - Make a mode that makes everything barrier block or invis (like Mineshaft Hypixel bug) so that you play blind to the map but based on memory basically equivalent to invis level in GD lmao
-- Customizable MOTD/favicon?
-- Sync proxy server list playercount to number of people online on dropper https://minecraft.wiki/w/Java_Edition_protocol/Server_List_Ping
+
+  
 - Test all different possible versions and multiple accounts to prevent bug oversights (nothing means it worked):
   - 1.8.9
   - 1.19.4
@@ -48,7 +68,19 @@
   - 1.20.2, 1.20.6, 1.21 FAILED (working on it)
   - 1.21.4 FAILED (clienthandler issue likely)
   - 1.21.5 UNSUPPORTED BY node-minecraft-protocol
+
+
 - Clean up readme BY MOVING EACH ATROCIOUSLY LONG SECTION OF IT INTO ITS OWN MARKDOWN FILE 
+
+
+
+
+
+
+
+
+
+
 
 
 

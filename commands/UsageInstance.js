@@ -48,7 +48,8 @@ export class UsageInstance {
     this.running = true
     try {
       await this.command.run(this)
-    } catch (error) {
+    }
+    catch (error) {
       console.log("--- An exception occurred, please report this to Lapis#7110 on Discord ---")
       console.error(error)
       console.log("--- An exception occurred, please report this to Lapis#7110 on Discord ---")

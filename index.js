@@ -22,7 +22,7 @@ process.on("uncaughtException", (error, origin) => { //catches uncaught exceptio
   setInterval(() => {}, 9999999)
 })
 
-import "./hideWarning.js" //read the file to figure out what it does (doesnt really matter)
+import "./utils/hideWarning.js" //read the file to figure out what it does (doesnt really matter)
 import { Proxy } from "./Proxy.js" //class that actually handles making the local proxy server to connect to
 import { handleCommand } from "./commands/handler.js"
 import readline from "readline" //basic std/file input lib in node.js

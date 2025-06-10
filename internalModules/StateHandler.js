@@ -48,15 +48,19 @@ export class StateHandler extends EventEmitter {
     if (meta.name === "chat") {
       if (data.position === 2) return
       actualMessage = data.message
-    } else if (meta.name === "system_chat") {
+    }
+    else if (meta.name === "system_chat") {
       if ("type" in data && data.type !== 1) return
       if ("isActionBar" in data && data.isActionBar === true) return
       actualMessage = data.content
-    } else return
+    }
+    else return
+
     let parsedMessage
     try {
       parsedMessage = JSON.parse(actualMessage)
-    } catch (error) {
+    }
+    catch (error) {
       //invalid JSON, Hypixel sometimes sends invalid JSON with unescaped newlines
       return
     }
@@ -67,7 +71,8 @@ export class StateHandler extends EventEmitter {
       let content = parsedMessage.text
       try {
         content = JSON.parse(content)
-      } catch (error) {
+      }
+      catch (error) {
         break checks
       }
       if (typeof content?.server !== "string") break checks
@@ -89,7 +94,8 @@ export class StateHandler extends EventEmitter {
         return { //equivalent to breaking and cancelling packet
           type: "cancel"
         }
-      } else {
+      }
+      else {
         this.lastServerLocraw = content.server
       }
       if (content.gametype === "ARCADE" && content.mode === "DROPPER") {
@@ -274,10 +280,13 @@ export class StateHandler extends EventEmitter {
     if (meta.name === "chat") {
       if (data.position !== 2) return
       actualMessage = data.message
-    } else if (meta.name === "system_chat") {
+    }
+    else if (meta.name === "system_chat") {
       if (data.type !== 2 && !data.isActionBar) return
       actualMessage = data.content
-    } else return
+    }
+    else return
+    
     let parsedMessage
     try {
       parsedMessage = JSON.parse(actualMessage)
@@ -305,9 +314,10 @@ export class StateHandler extends EventEmitter {
   }
 
   bindEventListeners() {
-    this.clientHandler.on("destroy", () => {
+    this.clientHandler.on("destroy", () => { //happens when client leaves game, reset state
       this.setState("none")
     })
+
     this.proxyClient.on("login", () => {
       this.setState("none")
       if (this.tryLocrawTimeout) {
@@ -322,7 +332,8 @@ export class StateHandler extends EventEmitter {
           this.requestedLocraw = true
           this.clientHandler.sendServerCommand("locraw")
         }, 1500)
-      } else {
+      }
+      else {
         this.tryLocrawTimeout = setTimeout(() => {
           if (this.clientHandler.destroyed) return
           this.requestedLocraw = true
@@ -332,7 +343,7 @@ export class StateHandler extends EventEmitter {
     })
   }
 
-  setState(state) {
+  setState(state) { //basically whenever changing state this function is used to emit the state change event and update object variables if needed
     if (this.state === state) return
     if (state === "none") {
       this.mapset = null

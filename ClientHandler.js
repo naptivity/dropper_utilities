@@ -50,7 +50,7 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
     //due to issues with chunk parsing on 1.18, this does not currently support tick counting on 1.18.
     this.disableTickCounter = userClient.protocolVersion >= 757
 
-    // ------------------------------------------------------------------
+
     if (!this.disableTickCounter) this.worldTracker = new WorldTracker(this)
     this.stateHandler = new StateHandler(this)
     if (!this.disableTickCounter) {
@@ -69,7 +69,8 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
     this.customModules = new CustomModules(this)
     this.tabListHandler = new TabListHandler(this)
     this.autoVote = new AutoVote(this)
-    // ------------------------------------------------------------------
+
+
 
     this.logPackets = false
     this.packetFilter = ["boss_bar", "ping", "pong", "keep_alive", "scoreboard_objective", "position",
@@ -145,9 +146,10 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
         let result = modifier(data, meta)
         if (result) {
           let type = result.type
-          if (type === "cancel") {
+          if (type === "cancel") { //completely drops packet instead of sending it to client
             return
-          } else if (type === "replace") {
+          }
+          else if (type === "replace") {
             data = result.data
             meta = result.meta
             replaced = true
@@ -183,6 +185,17 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
 
 
 
+  sendCustomServerPacket(meta_name, data) {
+    this.proxyClient.write(meta_name, data)
+  }
+
+  
+  sendCustomClientPacket(meta_name, data) {
+    this.userClient.write(meta_name, data)
+  }
+
+
+
   sendClientMessage(content) {
     if (this.userClient.protocolVersion < 759) {
       this.userClient.write("chat", {
@@ -190,12 +203,14 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
         message: JSON.stringify(content),
         sender: "00000000-0000-0000-0000-000000000000"
       })
-    } else if (this.userClient.protocolVersion < 760) {
+    }
+    else if (this.userClient.protocolVersion < 760) {
       this.userClient.write("system_chat", {
         content: JSON.stringify(content),
         type: 1
       })
-    } else {
+    }
+    else {
       this.userClient.write("system_chat", {
         content: JSON.stringify(content),
         isActionBar: false
@@ -211,12 +226,14 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
         message: JSON.stringify(content),
         sender: "00000000-0000-0000-0000-000000000000"
       })
-    } else if (this.userClient.protocolVersion < 760) {
+    }
+    else if (this.userClient.protocolVersion < 760) {
       this.userClient.write("system_chat", {
         content: JSON.stringify(content),
         type: 2
       })
-    } else {
+    }
+    else {
       this.userClient.write("system_chat", {
         content: JSON.stringify(content),
         isActionBar: true
@@ -225,58 +242,13 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
   }
 
 
-  sendCustomServerPacket(meta_name, data) {
-    this.proxyClient.write(meta_name, data)
-  }
-
-  sendCustomClientPacket(meta_name, data) {
-    this.userClient.write(meta_name, data)
-  }
-
-
   sendServerCommand(content) {
     if (this.userClient.protocolVersion < 759) {
       this.proxyClient.write("chat", {
         message: "/" + content
-      })
-    } else if (this.userClient.protocolVersion < 760) {
-      this.proxyClient.write("chat_command", {
-        command: content,
-        timestamp: BigInt(Date.now()),
-        salt: 0n,
-        argumentSignatures: [],
-        signedPreview: false
-      })
-    } else if (this.userClient.protocolVersion < 761) {
-      this.proxyClient.write("chat_command", {
-        command: content,
-        timestamp: BigInt(Date.now()),
-        salt: random64BitBigInt(),
-        argumentSignatures: [],
-        signedPreview: false,
-        previousMessages: [],
-        lastRejectedMessage: undefined
-      })
-    } else {
-      this.proxyClient.write("chat_command", {
-        command: content,
-        timestamp: BigInt(Date.now()),
-        salt: random64BitBigInt(),
-        argumentSignatures: [],
-        messageCount: 0,
-        acknowledged: Buffer.alloc(3)
       })
     }
-  }
-
-
-
-  sendServerCommand(content) {
-    if (this.userClient.protocolVersion < 759) {
-      this.proxyClient.write("chat", {
-        message: "/" + content
-      })
-    } else if (this.userClient.protocolVersion < 760) {
+    else if (this.userClient.protocolVersion < 760) {
       this.proxyClient.write("chat_command", {
         command: content,
         timestamp: BigInt(Date.now()),
@@ -284,7 +256,8 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
         argumentSignatures: [],
         signedPreview: false
       })
-    } else if (this.userClient.protocolVersion < 761) {
+    }
+    else if (this.userClient.protocolVersion < 761) {
       this.proxyClient.write("chat_command", {
         command: content,
         timestamp: BigInt(Date.now()),

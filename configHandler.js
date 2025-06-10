@@ -1,6 +1,6 @@
 import fs from "fs" //for reading config file
 import YAML from "yaml" //for easy interfacing with the yaml structure of the config file
-import defaultConfig from "./defaultConfig.js" //default format of the config file (will have to edit a lot because of so many added features)
+import defaultConfig from "./static/defaultConfig.js" //default format of the config file (will have to edit a lot because of so many added features)
 
 export let config = {} //make config object that will store the key value pair of each config property
 try { //will stay in this try block and read config file correctly if its all set up

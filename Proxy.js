@@ -1,6 +1,6 @@
 import { createServer } from "minecraft-protocol"  //minecraft-protocol is https://github.com/PrismarineJS/node-minecraft-protocol which is just the mc packet interfacing library
 import { ClientHandler } from "./ClientHandler.js" //class that creates a minecraft client that connects to hypixel
-import faviconText from "./favicon.js" //import base 64 encoded version of the favicon image
+import faviconText from "./static/favicon.js" //import base 64 encoded version of the favicon image
 import minecraftData from "minecraft-data" //contains all minecraft metadata and stuff, only used to convert protocol version to normal version in this case
 import { config } from "./configHandler.js" //import all the variables 
 
@@ -77,8 +77,9 @@ export class Proxy { //remember that export is what makes objects methods and va
   }
 
 
-  compatibleVersion(protocolVersion) { //simple check to see if given protocolversion not within supportedstring protocol versions
-    return (protocolVersion == 47 || (protocolVersion >= 759 && protocolVersion <= 769)) //equals 1.8-1.8.9 or between 1.19-1.21.4
+  compatibleVersion(protocolVersion) { //simple check to see if given protocolversion is within supportedstring protocol versions
+    return (protocolVersion == 47 || (protocolVersion >= 759 && protocolVersion <= 763)) //equals 1.8-1.8.9 or between 1.19-1.20.1 (not past 1.20.1 rn since proxy breaks currently)
+    // return (protocolVersion == 47 || (protocolVersion >= 759 && protocolVersion <= 769)) //equals 1.8-1.8.9 or between 1.19-1.21.4
   }
 
 

@@ -78,7 +78,8 @@ export class TabListHandler {
     this.stateHandler.on("state", state => {
       if (state === "waiting") {
         this.checkPlayerList()
-      } else {
+      }
+      else {
         for (let key of this.teamOverrides.keys()) {
           this.removeTeamOverride(key)
         }
