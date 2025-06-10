@@ -21,6 +21,7 @@
   - For now just requeue if someone finishes map (whether its you or not)
 
 - Dropper API
+  - Add both hydropper and hypixel api key options (I believe using api key is faster)
   - (Semi)auto report player API stats (in chat or tab menu) to spot someone else who is running the game (or someone who's nicked) (and include gradually expiring cache to not overwhelm Hypixel API)
   - State win/completion ratios
 

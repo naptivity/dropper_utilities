@@ -26,6 +26,7 @@ export const use_item = { //serverbound packet
   "sequence": null
 }
 
+
 export const close_window = { //serverbound packet
   "windowId": null
 }

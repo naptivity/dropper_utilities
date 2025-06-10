@@ -197,21 +197,21 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
 
 
   sendClientMessage(content) {
-    if (this.userClient.protocolVersion < 759) {
+    if (this.userClient.protocolVersion < 759) { //before 1.19.1
       this.userClient.write("chat", {
         position: 1,
         message: JSON.stringify(content),
         sender: "00000000-0000-0000-0000-000000000000"
       })
     }
-    else if (this.userClient.protocolVersion < 760) {
+    else if (this.userClient.protocolVersion < 760) { //1.19.1
       this.userClient.write("system_chat", {
         content: JSON.stringify(content),
         type: 1
       })
     }
     else {
-      this.userClient.write("system_chat", {
+      this.userClient.write("system_chat", { //beyond 1.19.1
         content: JSON.stringify(content),
         isActionBar: false
       })

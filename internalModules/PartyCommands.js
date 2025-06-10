@@ -18,15 +18,19 @@ export class PartyCommands {
       if (meta.name === "chat") {
         if (data.position === 2) return
         actualMessage = data.message
-      } else if (meta.name === "system_chat") {
+      }
+      else if (meta.name === "system_chat") {
         if ("type" in data && data.type !== 1) return
         if ("isActionBar" in data && data.isActionBar === true) return
         actualMessage = data.content
-      } else return
+      }
+      else return
+      
       let parsedMessage
       try {
         parsedMessage = JSON.parse(actualMessage)
-      } catch (error) {
+      }
+      catch (error) {
         //invalid JSON, Hypixel sometimes sends invalid JSON with unescaped newlines
         return
       }

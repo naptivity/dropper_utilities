@@ -132,7 +132,8 @@ export class AutoQueue {
       let parsedMessage
       try {
         parsedMessage = JSON.parse(data.message)
-      } catch (error) {
+      }
+      catch (error) {
         //invalid JSON, Hypixel sometimes sends invalid JSON with unescaped newlines
         return
       }
