@@ -16,7 +16,7 @@ export const window_click = { //serverbound packet
 }
 
 
-export const held_item_slot = { //serverbound packet
+export const held_item_slot = { //serverbound and clientbound packet
   "slotId": 0
 }
 
