@@ -3,7 +3,9 @@ data.json
 chunks.json
 packets.txt
 .vscode
-
+out.js
+node.exe
+out.exe
 
 
 

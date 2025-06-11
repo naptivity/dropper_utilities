@@ -1,5 +1,5 @@
 # Hypixel Dropper Utilities
-[Original project by LapisHusky](https://github.com/LapisHusky/dropperutilities). Revived, revised, ~~updated,~~ commented, and expanded by naptivity! :3
+[Original project by LapisHusky](https://github.com/LapisHusky/dropperutilities). Revived, revised, [~~updated,~~](#Will-new-versions-be-supported), commented, and expanded by naptivity! :3
 
 This is a node.js proxy that sits between your Minecraft client and Hypixel, designed to add convenient features and insights to dropper. This works by having you join a local server that sits between your Minecraft client and Hypixel.
 
@@ -11,20 +11,29 @@ This is my first serious JavaScript project undertaking, apologies for any bugs 
 
 Feedback is encouraged and appreciated!
 
+# This readme is currently a mess, sorry! Currently only supports running from source (see below). Also, look at TODO.md :3
 
-## How to use (Windows)
+
+
+<!-- ill add back the release instructions once i get a damn release working :( -->
+
+<!-- ## How to use (Windows)
 - Download the file from [releases](https://github.com/naptivity/dropperutilities/releases) windows.exe.
 - You may move the downloaded file to a separate folder, or leave it where it was.
 - Run the .exe file to start the proxy. This program is not officially approved by Microsoft, so Windows may present a security warning. You can click More Info and find a Run Anyway button. A new window should pop up. If everything goes as it should, you should see the text: `Proxy started. You may now join localhost in Minecraft. Keep this window open in the background.`
 - Add a multiplayer server with the IP `localhost` in a supported Minecraft version.
 - Join the server
 - Check the window from earlier. You may need to follow login instructions there the first time you run this, afterwards login information is saved. [Why do I need to login?](#Why-do-I-need-to-login)
+- See features for commands
+- Once you're in Hypixel, you can use `/tc` or `/togglecommands` to toggle party chat commands on or off. By default, they are deactivated.
+- Create or join a party
+- Run `/party chat !help` or `/commands` for a list of commands
+- To stop the program, close the window. This will disconnect you if you're still logged into Minecraft. -->
+
 
 <!-- README TODO
 
-Make proper update features section and link it here
-
-Link why do i need to login in the correct place in the FAQ below
+Make properly updated features section and link it here
 
 Standardize whether or not there are periods at the end of things lol either be serious or dont pick a side
 
@@ -36,15 +45,9 @@ Move features, FAQ, and maybe even setup to their own file and keep readme conci
 
  -->
 
-- See features for commands
-
-<!-- - Once you're in Hypixel, you can use `/tc` or `/togglecommands` to toggle party chat commands on or off. By default, they are deactivated.
-- Create or join a party
-- Run `/party chat !help` or `/commands` for a list of commands -->
-- To stop the program, close the window. This will disconnect you if you're still logged into Minecraft.
 
 ## Run from source (Windows, Linux, Mac)
-- Install [Node.js](https://nodejs.org/en/download/)
+- Install [Node.js](https://nodejs.org/en/download/) (make sure npm is installed too)
 - Download this repo to a folder on your computer (First click the green Code button near the top center, then click Download ZIP, and unzip the folder.)
 - Open Windows Powershell or a similar command prompt
 - Navigate to the folder using the `cd` command: for example `cd C:/users/Lapis/Desktop/dropperutilities`
@@ -53,15 +56,23 @@ Move features, FAQ, and maybe even setup to their own file and keep readme conci
 - The proxy is now up and running, follow the above instructions to use it in Minecraft.
 - To stop the program, type `exit` in the command prompt, or close the window.
 
-## Build an executable yourself
-- Install [Node.js](https://nodejs.org/en/download/)
+
+## IGNORE SECTION BELOW!! pkg is deprecated so figuring out building is annoying... just run it from source for now :3 ill figure it out later 
+## Build an executable yourself (for easy distribution/Github releases) 
+- Install [Node.js](https://nodejs.org/en/download/) (make sure npm is installed too)
 - Download this repo to a folder on your computer (First click the green Code button near the top center, then click Download ZIP, and unzip the folder.)
 - Open Windows Powershell or an equivalent command prompt
 - Navigate to the folder using the `cd` command: for example `cd C:/users/Lapis/Desktop/dropperutilities`
 - Run `npm install` to download this project's dependencies
-- Run `npm i -g esbuild pkg` to download the tools needed to build the executable
-- Run `esbuild ./ --outfile=out.js --bundle --platform=node --minify-whitespace --minify-syntax` to bundle the project into a single file
-- Run `pkg ./out.js --public --compress=Brotli` to convert that into executables for Windows, Linux, and MacOS. This may take a while, you can do it without `--compress=Brotli` to speed it up.
+- Run `npm i -g esbuild` to download the tool needed to build the executable (we are bundling a node binary with the js file since pkg was deprecated)
+- Run `esbuild ./ --outfile=out.js --bundle --platform=node --minify-whitespace --minify-syntax` to build the project into a single file
+<!-- - Download your platform's node binary from https://nodejs.org/dist/v22.5.0/ <strong>(I am using Windows, following steps slightly vary on other OSes but is roughly the same)</strong>
+  - Quick powershell command to do so: `Invoke-WebRequest https://nodejs.org/dist/v22.5.0/win-x64/node.exe -OutFile node.exe`
+- 
+- Run the powershell `cmd /c "copy /b node.exe+out.js out.exe"` to bundle the program and the node executable into one.
+- You may delete node.exe afterwards -->
+
+
 
 ## Features
 - `/dropper`, `/q`, and `/rq` can be used as a shortcut to play Dropper, instead of the long `/play arcade_dropper`.
@@ -86,6 +97,7 @@ Move features, FAQ, and maybe even setup to their own file and keep readme conci
 - Conveniently invite others to the dropper community Discord server with `/dl`.
 - Most commands that work as slash commands also work in party chat if you have enabled party chat commands with `/tc`. Commands in party chat begin with `!` instead of `/`. To view a list of party chat commands, use `!help`.
 - An experimental performance optimization which loads chunks from a cache instead of waiting for Hypixel to send them over the network. Enable with the chunk-caching option in config.yml. (Note: This is currently force disabled because Dropper's release introduced a new map layout with 4 different worlds.)
+- Auto voting (non toggleable as of rn)
 
 
 

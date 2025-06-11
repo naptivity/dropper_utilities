@@ -5,6 +5,12 @@
 - <strong>FOR THE LOVE OF WHATEVER PLEASE TEST AUTO VOTING AND ALL THESE FEATURES IN EVERY SUPPORTED PROXY VERSION ONCE THEY ARE COMPLETED I ALMOST FORGOT</strong>
 
 
+- Fix duplicate lost connection message showing in console, show what user left
+
+
+- Make config file have control for ever feature being enabled or not (as promised in the warning), including autovote
+
+
 - Auto voting, including auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
   - Make sure multiple accounts/clients on the same pc can all join and also adapt auto voting to distribute voting between them (same as above just local without using party chat)
 
@@ -48,7 +54,7 @@
 - Add reset config file on next reboot option either in config file or in cli commands
 
 
-- Make config file have control for ever feature being enabled or not (as promised in the warning)
+
 
 
 - Tab command completion for proxy commands
@@ -95,8 +101,8 @@
 - https://stackoverflow.com/questions/48524417/should-the-package-lock-json-file-be-added-to-gitignore I already hate npm dependencies and this is my first time using them (see package-lock.json progress below)
 
 
-## Commenting Progress
-My goal before tackling the todo list is to go through every single file in here and excessively (yes, I mean VERY excessively you can go look for yourself) comment/understand the code while clearing it up, allowing me to be very familiar with the code before I start messing with stuff. Recall that this is my first time doing a major program in JS, so this is helpful to iron out language specific nuances (you can see me point some of these out in comments). <strong>Once I finish the first pass I plan to review everything one more time briefly and ensure I didn't miss anything or mmisunderstand anything.</strong> I do however need to track my progress in commenting/understanding the files, so here it is:
+## Commenting Progress (outdated, will fix)
+My goal before tackling the todo list is to go through every single file in here and excessively (yes, I mean VERY excessively you can go look for yourself in Proxy.js) comment/understand the code while clearing it up, allowing me to be very familiar with the code before I start messing with stuff. Recall that this is my first time doing a major program in JS, so this is helpful to iron out language specific nuances (you can see me point some of these out in comments). <strong>Once I finish the first pass I plan to review everything one more time briefly and ensure I didn't miss anything or mmisunderstand anything.</strong> I do however need to track my progress in commenting/understanding the files, so here it is:
 
 Round 2 later once everything has had one pass
 

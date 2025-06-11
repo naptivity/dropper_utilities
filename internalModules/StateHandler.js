@@ -265,16 +265,13 @@ export class StateHandler extends EventEmitter {
     checks: {
       if (this.state !== "game") break checks
       if (!parsedMessage.extra) break checks
-      if (parsedMessage.extra.length < 5) break checks
+      if (parsedMessage.extra.length < 4) break checks
       if (parsedMessage.text !== "") break checks
-      if (parsedMessage.extra[parsedMessage.extra.length - 1].text !== "!") break checks
       if (parsedMessage.extra[parsedMessage.extra.length - 1].color !== "gray") break checks
-      if (parsedMessage.extra[parsedMessage.extra.length - 2].color !== "gold") break checks
-      if (parsedMessage.extra[parsedMessage.extra.length - 3].text !== "finished all maps in ") break checks
-      if (parsedMessage.extra[parsedMessage.extra.length - 3].color !== "gray") break checks
-      this.otherFinishCount++
-      this.emit("other_finish")
-      console.log("other_finish")
+      if (parsedMessage.extra[parsedMessage.extra.length - 3].text === "finished all maps in ") {
+        this.otherFinishCount++
+        this.emit("other_finish")
+      }
     }
   }
 
