@@ -65,7 +65,8 @@ export class PartyChatThrottle {
     let message = this.queue.shift()
     if (message.startsWith("/")) {
       this.clientHandler.sendServerCommand(message.substring(1))
-    } else {
+    }
+    else {
       throw new Error("attempting to send regular chat through PartyChatThrottle, this is not implemented!")
     }
     this.lastMessageTime = performance.now()

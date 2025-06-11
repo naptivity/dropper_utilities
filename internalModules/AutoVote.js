@@ -24,6 +24,8 @@ export class AutoVote {
     this.trackChat = false
     this.recentMessages = []
 
+    this.autoVoted = false
+
 
     this.bindEventListeners()
     this.bindModifiers()
@@ -40,11 +42,15 @@ export class AutoVote {
     if (meta.name === "use_item") {
       this.use_item_sequence = data.sequence
     }
+    else if (meta.name === "close_window" && this.windowId && !this.autoVoted) { //if the user closed the window while we are autovoting
+      this.windowId = null //stop autovote by nullify windowid
+    }
   }
 
 
 
   handleIncomingPacketChecks(data, meta) {
+    if (this.autoVoted) return //if autovoting is over we shouldnt do it again
     if (meta.name === "open_window" && JSON.parse(data.windowTitle).translate === "Map Voting") { //if its an open window packet specifically for map voting gui
       this.windowId = data.windowId //set the window id to the window id of the detected map voting gui
     }
@@ -72,8 +78,8 @@ export class AutoVote {
       }
 
       actualMessage = JSON.parse(actualMessage)
-      console.log(actualMessage)
-      console.log("\n\n")
+      // console.log(actualMessage)
+      // console.log("\n\n")
 
       if (actualMessage.extra) { //if it has extra field
         if (actualMessage.extra[0].text === "You voted for ") { //if chat message is saying you voted for a map
@@ -83,7 +89,7 @@ export class AutoVote {
           this.recentMessages.push(actualMessage.extra[0].text) //put no remaining votes message in recentmessages array for autovote to access
         }
         else if (actualMessage.extra[0].text.includes("few seconds")) {
-          this.recentMessages.push(actualMessage.extra[0].text) //if chat message is saying cooldown, put cooldown message in recentmessages array for autovote to access
+          this.recentMessages.push("few seconds") //if chat message is saying cooldown, put cooldown message in recentmessages array for autovote to access
         }
       }
     }
@@ -138,9 +144,14 @@ export class AutoVote {
     else {
       throw new Error("The sample map item in the voting GUI (item slot 11, top-leftmost apparently isn't in any mapset or wasn't standardized correctly)") //the name isnt in any of the mapsets??
     }
+
+
+    //here is where it should figure out which 3 to vote
     if (autoVoteMaps.length > 3) {
       autoVoteMaps = autoVoteMaps.slice(0, 3)
     }
+
+
     autoVoteMaps = autoVoteMaps.map(item => item.toLowerCase()) //make the autovote lists lowercase for standardization
 
     for (let i = 0; i < data.items.length; i++) {
@@ -166,12 +177,21 @@ export class AutoVote {
 
           while (!success && attempts < 5) { //retries 5 times (5 seconds)
             startLength = this.recentMessages.length
+
+            if (!this.windowId) { //if windowid was nullified due to closing window, cancel auto vote. can try again by opening the voting menu
+              this.clientHandler.sendClientMessage({
+                text: `§9DropperUtilities > §rCancelled auto vote! Keep the window open for auto vote to work. Retry by opening the voting menu again.`
+              })
+              return
+            }
+
             this.clientHandler.sendCustomServerPacket("window_click", window_click_packet) //sends window click packet
             attempts++
-            while (this.recentMessages.length === startLength) { //waits until new message is recieved
+            while (this.recentMessages.length === startLength) { //waits until new relevant message is recieved
               await new Promise(resolve => setTimeout(resolve, 50))
             }
 
+            // console.log(this.recentMessages)
             if (this.recentMessages.includes(name)) {
               this.trackChat = false
               success = true
@@ -179,31 +199,6 @@ export class AutoVote {
             else if (this.recentMessages.includes("few seconds")) {
               this.clientHandler.sendClientMessage({
                 text: `§9DropperUtilities > §rAuto vote throttled, waiting a second!` //currently this isnt working!!
-
-
-
-
-
-
-
-
-
-
-                //issue here future me (this if statement doesnt seem to get triggered, print recentMessages to debug)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               })
               await new Promise(r => setTimeout(r, 1000)) //wait 1 second to try again
             }
@@ -213,10 +208,8 @@ export class AutoVote {
               })
               throw new Error("No votes available auto vote error")
             }
+            this.recentMessages = []
           }
-
-
-
 
           if (success) {
             this.clientHandler.sendClientMessage({
@@ -241,6 +234,8 @@ export class AutoVote {
     close_window_packet.windowId = this.windowId
     this.clientHandler.sendCustomServerPacket("close_window", close_window_packet) //tell the server that the window was closed after auto voting
     this.clientHandler.sendCustomClientPacket("close_window", close_window_packet) //tell the client that the window was closed after auto voting (or else it will remain open clientside)
+    this.windowId = null //to prevent the auto window reopening from happening after auto voting finished, windowId not null basically means auto voting is currently happening
+    this.autoVoted = true //stop processing the packets to let the user open the voting gui themselves
   }
 
 
@@ -248,6 +243,7 @@ export class AutoVote {
   bindEventListeners() {
     this.clientHandler.stateHandler.on("state", state => {
       if (state === "waiting") { //when entered a game lobby and waiting
+        this.autoVoted = false //make sure we are able to process the necessary packets
         this.completedWindowIds = [] //reset windows that have been seen before since it resets on server transfer
         this.clientHandler.sendCustomServerPacket("held_item_slot", held_item_slot) //sets hand slot to 0 (for server)
         this.clientHandler.sendCustomClientPacket("held_item_slot", held_item_slot) //sets hand slot to 0 (for client, to prevent desync)

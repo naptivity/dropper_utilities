@@ -51,6 +51,12 @@
 - Make config file have control for ever feature being enabled or not (as promised in the warning)
 
 
+- Tab command completion for proxy commands
+
+
+- Requeue until certain mapset
+
+
 - Prettier serverlist look
   - Customizable MOTD/favicon?
   - Sync proxy server list playercount to number of people online on dropper https://minecraft.wiki/w/Java_Edition_protocol/Server_List_Ping

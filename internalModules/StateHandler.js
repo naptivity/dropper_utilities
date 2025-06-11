@@ -260,6 +260,7 @@ export class StateHandler extends EventEmitter {
       this.emit("time", infoObject)
       this.gameState++
     }
+
     //another user finishing
     checks: {
       if (this.state !== "game") break checks
@@ -272,6 +273,8 @@ export class StateHandler extends EventEmitter {
       if (parsedMessage.extra[parsedMessage.extra.length - 3].text !== "finished all maps in ") break checks
       if (parsedMessage.extra[parsedMessage.extra.length - 3].color !== "gray") break checks
       this.otherFinishCount++
+      this.emit("other_finish")
+      console.log("other_finish")
     }
   }
 

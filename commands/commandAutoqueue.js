@@ -14,7 +14,7 @@ export async function run(usageInstance) {
       usageInstance.reply(`§7Automatic re-queueing is currently §cdisabled§7.`)
     }
     if (usageInstance.runnerTrusted) {
-      usageInstance.reply(`§7Usage: ${usageInstance.prefix}aq off | ${usageInstance.prefix}aq time <time in seconds> | ${usageInstance.prefix}aq finish.`)
+      usageInstance.reply(`§7Usage: ${usageInstance.prefix}aq off | ${usageInstance.prefix}aq time <time in seconds> | ${usageInstance.prefix}aq finish | f | ${usageInstance.prefix}aq ofinish | of.`)
     }
     return
   }
@@ -37,10 +37,16 @@ export async function run(usageInstance) {
     }
     autoQueue.setConfig("time", time * 1000)
     usageInstance.reply(`§7Automatic re-queueing is now set to §crequeue after ${time} seconds§7.`)
-  } else if (usageInstance.args[0] === "finish") {
+  }
+  else if (usageInstance.args[0] === "finish" || usageInstance.args[0] === "f") {
     autoQueue.setConfig("finish")
     usageInstance.reply(`§7Automatic re-queueing is now set to §crequeue on finish§7.`)
-  } else {
+  }
+  else if (usageInstance.args[0] === "ofinish" || usageInstance.args[0] === "of") {
+    autoQueue.setConfig("other_finish")
+    usageInstance.reply(`§7Automatic re-queueing is now set to §crequeue on any player finishing§7.`)
+  }
+  else {
     usageInstance.reply(`§cInvalid subcommand.`)
   }
 }
