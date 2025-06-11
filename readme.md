@@ -13,7 +13,9 @@ Feedback is encouraged and appreciated!
 
 # This readme is currently a mess, sorry! Currently only supports running from source (see below). Also, look at TODO.md :3
 
-
+Current added features:
+- Auto voting (no toggle yet, change maps in config)
+- Auto queue on any player finish (/aq of)
 
 <!-- ill add back the release instructions once i get a damn release working :( -->
 
