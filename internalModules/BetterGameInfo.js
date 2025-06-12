@@ -41,7 +41,8 @@ export class BetterGameInfo {
             this.sendActionBar()
           }, 10)
         }
-      } else {
+      }
+      else {
         if (this.sendInterval) {
           clearInterval(this.sendInterval)
           this.sendInterval = null
@@ -63,14 +64,17 @@ export class BetterGameInfo {
     let state = this.stateHandler.gameState
     if (state === "waiting") {
       state = "Waiting"
-    } else if (state === 5) {
+    }
+    else if (state === 5) {
       state = "Finished"
     }
     if (state === "Waiting") {
       text += "Countdown§8"
-    } else if (state === "Finished") {
+    }
+    else if (state === "Finished") {
       text += "Finished§8"
-    } else {
+    }
+    else {
       text += "Map " + (state + 1) + "§8"
     }
     text += " -§f"
@@ -78,14 +82,17 @@ export class BetterGameInfo {
     if (state === "Finished") {
       if (this.stateHandler.totalTime !== null) {
         runTime = formatTime(this.stateHandler.totalTime)
-      } else {
+      }
+      else {
         //estimate the total time from a sum of each segment if we haven't gotten the chat message with Hypixel's time yet
         let totalTime = this.stateHandler.times.reduce((partialSum, a) => partialSum + a, 0)
         runTime = formatTime(totalTime)
       }
-    } else if (state === "Waiting") {
+    }
+    else if (state === "Waiting") {
       runTime = "00:00.000"
-    } else {
+    }
+    else {
       runTime = formatTime(performance.now() - this.stateHandler.startTime)
     }
     text += " Total Time: §a" + runTime + "§f"
@@ -99,7 +106,8 @@ export class BetterGameInfo {
       if (!this.clientHandler.disableTickCounter) {
         text += " Ticks: §9" + this.tickCounter.currentTickCount + "§f"
       }
-    } else if (state === "Finished" && !this.clientHandler.disableTickCounter) {
+    }
+    else if (state === "Finished" && !this.clientHandler.disableTickCounter) {
       text += " Ticks: §9" + this.tickCounter.tickCounts.reduce((partialSum, a) => partialSum + a, 0) + "§f"
     }
     this.clientHandler.sendClientActionBar({

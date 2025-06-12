@@ -31,7 +31,8 @@ class IdentifierHandler {
       }
       if (!profileInfo) return null
       return this.addToCache(profileInfo)
-    } else {
+    }
+    else {
       let searchResult = this.cachedPairs.find(pair => pair.lower === normalized.value)
       if (searchResult) {
         return searchResult

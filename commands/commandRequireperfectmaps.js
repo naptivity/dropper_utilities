@@ -8,7 +8,8 @@ export async function run(usageInstance) {
   if (autoQueue.requirePerfectMaps && !usageInstance.argsString) {
     autoQueue.disablePerfectMapRequirement()
     usageInstance.reply("§7Perfect map requirement is now §cdisabled§7.")
-  } else {
+  }
+  else {
     let configName = usageInstance.argsString
     if (configName) configName = configName.toLowerCase()
     let result = autoQueue.enablePerfectMapRequirement(configName)

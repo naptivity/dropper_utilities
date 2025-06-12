@@ -27,7 +27,8 @@ export async function run(usageInstance) {
       return
     }
     usageInstance.reply(`§7Trusted users: §c${names.join(", ")}§7.`)
-  } else if (usageInstance.args[0] === "add") {
+  }
+  else if (usageInstance.args[0] === "add") {
     if (!usageInstance.runnerTrusted) {
       usageInstance.reply("§cYou don't have permission to add trusted users.")
       return
@@ -54,7 +55,8 @@ export async function run(usageInstance) {
     }
     addToTrusted(info.uuid)
     usageInstance.reply(`§7${info.name} is now trusted.`)
-  } else if (usageInstance.args[0] === "remove") {
+  }
+  else if (usageInstance.args[0] === "remove") {
     if (!usageInstance.runnerTrusted) {
       usageInstance.reply("§cYou don't have permission to remove trusted users.")
       return

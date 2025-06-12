@@ -13,9 +13,9 @@ Feedback is encouraged and appreciated!
 
 # This readme is currently a mess, sorry! Currently only supports running from source (see below). Also, look at TODO.md :3
 
-Current added features:
+Completed features:
 - Auto voting (no toggle yet, change maps in config)
-- Auto queue on any player finish (/aq of)
+- Auto queue on any player finish (lose or win) (/aq of)
 
 <!-- ill add back the release instructions once i get a damn release working :( -->
 
@@ -95,8 +95,6 @@ Move features, FAQ, and maybe even setup to their own file and keep readme conci
 - `!takeownership` can be used by a /trusted member of your party to become party owner. Useful in cases of AFK party hosts
 
 - View your current ping with `/ping`.
-- View measurements of the server's ticks-per-second with `/tps`.
-- Conveniently invite others to the dropper community Discord server with `/dl`.
 - Most commands that work as slash commands also work in party chat if you have enabled party chat commands with `/tc`. Commands in party chat begin with `!` instead of `/`. To view a list of party chat commands, use `!help`.
 - An experimental performance optimization which loads chunks from a cache instead of waiting for Hypixel to send them over the network. Enable with the chunk-caching option in config.yml. (Note: This is currently force disabled because Dropper's release introduced a new map layout with 4 different worlds.)
 - Auto voting (non toggleable as of rn)

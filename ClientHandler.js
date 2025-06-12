@@ -5,12 +5,7 @@ import { AutoQueue } from "./internalModules/AutoQueue.js"
 import { StateHandler } from "./internalModules/StateHandler.js"
 import { PartyCommands } from "./internalModules/PartyCommands.js"
 import { PartyChatThrottle } from "./internalModules/PartyChatThrottle.js"
-import { TimeDetail } from "./internalModules/TimeDetail.js"
 import { BetterGameInfo } from "./internalModules/BetterGameInfo.js"
-import { TickCounter } from "./internalModules/TickCounter.js"
-import { WorldTracker } from "./internalModules/WorldTracker.js"
-import { ServerAgeTracker } from "./internalModules/ServerAgeTracker.js"
-import { CustomModules } from "./internalModules/CustomModules.js"
 import { ChunkPreloader } from "./internalModules/ChunkPreloader.js"
 import { TabListHandler } from "./internalModules/TabListHandler.js"
 import { AutoVote } from "./internalModules/AutoVote.js"
@@ -47,26 +42,14 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
     this.outgoingModifiers = []
     this.incomingModifiers = []
 
-    //due to issues with chunk parsing on 1.18, this does not currently support tick counting on 1.18.
-    this.disableTickCounter = userClient.protocolVersion >= 757
-
-
-    if (!this.disableTickCounter) this.worldTracker = new WorldTracker(this)
     this.stateHandler = new StateHandler(this)
-    if (!this.disableTickCounter) {
-      this.tickCounter = new TickCounter(this)
-      this.stateHandler.bindTickCounter()
-    }
-    //previously used just for party chat, now it throttles every party command
-    this.partyChatThrottle = new PartyChatThrottle(this)
+
+    this.partyChatThrottle = new PartyChatThrottle(this) //previously used just for party chat, now it throttles every party command
     this.customCommands = new CustomCommands(this)
     this.autoQueue = new AutoQueue(this)
     this.partyCommands = new PartyCommands(this)
-    this.timeDetail = new TimeDetail(this)
     this.betterGameInfo = new BetterGameInfo(this)
-    this.serverAgeTracker = new ServerAgeTracker(this)
     this.chunkPreloader = new ChunkPreloader(this)
-    this.customModules = new CustomModules(this)
     this.tabListHandler = new TabListHandler(this)
     this.autoVote = new AutoVote(this)
 
@@ -267,7 +250,8 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
         previousMessages: [],
         lastRejectedMessage: undefined
       })
-    } else {
+    }
+    else {
       this.proxyClient.write("chat_command", {
         command: content,
         timestamp: BigInt(Date.now()),

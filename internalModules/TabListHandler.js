@@ -41,11 +41,13 @@ export class TabListHandler {
           if (this.teamOverrides.has(playerInfo.UUID)) {
             this.removeTeamOverride(playerInfo.UUID)
           }
-        } else {
+        }
+        else {
           let object
           if (playerInfo.uuid) {
             object = this.players.get(playerInfo.uuid)
-          } else {
+          }
+          else {
             object = this.players.get(playerInfo.UUID)
           }
           if (!object) object = {}
@@ -103,7 +105,8 @@ export class TabListHandler {
         if ("formatting" in data) object.formatting = data.formatting
         if ("players" in data && data.players) {
           object.players = data.players
-        } else {
+        }
+        else {
           object.players = []
         }
         this.teams.set(team, object)
@@ -219,7 +222,8 @@ export class TabListHandler {
         let username
         if (player.player) {
           username = player.player.name
-        } else {
+        }
+        else {
           username = player.name
         }
         this.addTeamOverride(uuid, username, userData)
@@ -235,7 +239,8 @@ export class TabListHandler {
     let username
     if (player.player) {
       username = player.player.name
-    } else {
+    }
+    else {
       username = player.name
     }
     this.addTeamOverride(uuid, username, {nicked: true})
@@ -254,7 +259,8 @@ export class TabListHandler {
             mode: 4,
             players: [username]
           })
-        } else {
+        }
+        else {
           this.userClient.write("teams", {
             team: key,
             mode: 4,
@@ -268,13 +274,15 @@ export class TabListHandler {
       let extraText
       if (data.nicked) {
         extraText = "§c NICKED"
-      } else {
+      }
+      else {
         extraText = "§d " + data.wins.toString()
       }
       let newSuffix
       if (serverTeamValue?.suffix) {
         newSuffix = serverTeamValue.suffix + extraText
-      } else {
+      }
+      else {
         newSuffix = extraText
       }
       this.userClient.write("scoreboard_team", {
@@ -288,7 +296,8 @@ export class TabListHandler {
         color: 15,
         players: [username]
       })
-    } else {
+    }
+    else {
       let newSuffix
       let extraObject
       if (data.nicked) {
@@ -296,7 +305,8 @@ export class TabListHandler {
           color: "red",
           text: " NICKED"
         }
-      } else {
+      }
+      else {
         extraObject = {
           color: "light_purple",
           text: " " + data.wins.toString()
@@ -306,11 +316,13 @@ export class TabListHandler {
         let parsed = JSON.parse(serverTeamValue.suffix)
         if (parsed.extra) {
           parsed.extra.push(extraObject)
-        } else {
+        }
+        else {
           parsed.extra = [extraObject]
         }
         newSuffix = JSON.stringify(parsed)
-      } else {
+      }
+      else {
         newSuffix = JSON.stringify({
           italic: false,
           text: "",
@@ -320,7 +332,8 @@ export class TabListHandler {
       let name
       if (serverTeamValue && "name" in serverTeamValue) {
         name = serverTeamValue.name
-      } else {
+      }
+      else {
         //this probably works?
         name = JSON.stringify({
           italic: false,
@@ -330,7 +343,8 @@ export class TabListHandler {
       let prefix
       if (serverTeamValue && "prefix" in serverTeamValue) {
         prefix = serverTeamValue.prefix
-      } else {
+      }
+      else {
         //this probably works?
         prefix = JSON.stringify({
           italic: false,
@@ -340,7 +354,8 @@ export class TabListHandler {
       let formatting
       if (serverTeamValue && "formatting" in serverTeamValue) {
         formatting = serverTeamValue.formatting
-      } else {
+      }
+      else {
         formatting = 15
       }
       this.userClient.write("teams", {
@@ -370,7 +385,8 @@ export class TabListHandler {
         team: existingOverride.teamKey,
         mode: 1
       })
-    } else {
+    }
+    else {
       this.userClient.write("teams", {
         team: existingOverride.teamKey,
         mode: 1

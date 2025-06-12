@@ -10,7 +10,8 @@ export function getStats(uuid) {
       //if it's too old, re-fetch user data
       cache.delete(uuid)
       cacheTimes.delete(uuid)
-    } else {
+    }
+    else {
       return cache.get(uuid)
     }
   }

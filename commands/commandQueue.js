@@ -1,5 +1,5 @@
 export const name = "queue"
-export const aliases = ["requeue", "rq", "req", "q", "dropper"]
+export const aliases = ["rq", "q", "dropper"]
 export const allowedSources = ["slash", "party"]
 export const description = "Sends you to a game of Dropper"
 export const requireTrust = true

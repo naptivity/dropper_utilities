@@ -219,7 +219,7 @@ export class AutoVote {
           }
           else {
             this.clientHandler.sendClientMessage({
-              text: `§9DropperUtilities > §rAuto vote failed!`
+              text: `§9DropperUtilities > §rAuto vote failed! Retry by opening the voting menu again.`
             })
             throw new Error("Auto vote failed")
           }

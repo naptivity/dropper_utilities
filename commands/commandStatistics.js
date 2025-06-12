@@ -11,7 +11,8 @@ export async function run(usageInstance) {
   let username
   if (usageInstance.argsString !== "") {
     username = usageInstance.argsString
-  } else {
+  }
+  else {
     username = usageInstance.clientHandler.userClient.username
   }
   let playerStats = await getPlayerStats(username)

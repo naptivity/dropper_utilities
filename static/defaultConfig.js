@@ -31,9 +31,6 @@ auto-vote-maps:
   futuristic:
     - Warp, Sewer, UFO, City, Gears
 
-# Displayed in the discordlink command. Change if you wish.
-discord-link: https://discord.gg/Sqbj9Nb835
-
 # Dropper Utilities can fetch stats for other players in your game using Aiden (skrrrtt on Discord)'s API.
 # Each player's win count will be displayed in tab in Dropper games, letting you get a quick idea of how good each player is.
 # Additionally, this contributes to Aiden's database, allowing more accurate leaderboards to be displayed on his website (https://hydropper.info/leaderboard).

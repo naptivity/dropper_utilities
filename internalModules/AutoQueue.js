@@ -19,7 +19,7 @@ export class AutoQueue {
     this.reQueueTime = 45000
 
     this.requeueOnFinish = false
-    this.requeueOnOtherFinish = false
+    this.requeueOnAnyFinish = false
 
     this.bindEventListeners()
   }
@@ -56,13 +56,13 @@ export class AutoQueue {
       this.endRequeueTimeout()
       this.requeueAfterTime = false
       this.requeueOnFinish = false
-      this.requeueOnOtherFinish = false
+      this.requeueOnAnyFinish = false
     }
     else if (type === "time") {
       this.endRequeueTimeout()
       this.requeueAfterTime = true
       this.requeueOnFinish = false
-      this.requeueOnOtherFinish = false
+      this.requeueOnAnyFinish = false
       this.reQueueTime = value
       if (this.stateHandler.startTime !== null) {
         this.reQueueTimeout = setTimeout(() => {
@@ -75,13 +75,13 @@ export class AutoQueue {
       this.endRequeueTimeout()
       this.requeueAfterTime = false
       this.requeueOnFinish = true
-      this.requeueOnOtherFinish = false
+      this.requeueOnAnyFinish = false
     }
-    else if (type === "other_finish") {
+    else if (type === "any_finish") {
       this.endRequeueTimeout()
       this.requeueAfterTime = false
-      this.requeueOnFinish = true
-      this.requeueOnOtherFinish = true
+      this.requeueOnFinish = false
+      this.requeueOnAnyFinish = true
     }
   }
 
@@ -127,13 +127,13 @@ export class AutoQueue {
         }, this.reQueueTime)
       }
     })
-    this.stateHandler.on("gameEnd", () => {
+    this.stateHandler.on("game_end", () => {
       if (this.requeueOnFinish) {
         this.queueNewGame()
       }
     })
-    this.stateHandler.on("other_finish", () => {
-      if (this.requeueOnOtherFinish) {
+    this.stateHandler.on("player_finish", () => {
+      if (this.requeueOnAnyFinish) {
         this.queueNewGame()
       }
     })

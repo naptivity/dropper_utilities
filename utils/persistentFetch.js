@@ -13,17 +13,20 @@ async function doInternalFetch(url, options, attemptsRemaining, resolve, reject)
     let res = await fetch(url, options)
     if (res.ok) {
       resolve(res)
-    } else {
+    }
+    else {
       if (attemptsRemaining > 0) {
         doInternalFetch(url, options, attemptsRemaining - 1, resolve, reject)
-      } else {
+      }
+      else {
         reject(res)
       }
     }
   } catch (error) {
     if (attemptsRemaining > 0) {
       doInternalFetch(url, options, attemptsRemaining - 1, resolve, reject)
-    } else {
+    }
+    else {
       reject(error)
     }
   }

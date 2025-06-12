@@ -14,9 +14,11 @@ export class UsageInstance {
   handle() {
     if (this.source === "slash") {
       this.prefix = "/"
-    } else if (this.source === "party") {
+    }
+    else if (this.source === "party") {
       this.prefix = "!"
-    } else if (this.source === "console") {
+    }
+    else if (this.source === "console") {
       this.prefix = ""
     }
     this.fullStringTrim = this.fullString.trim()
@@ -26,10 +28,12 @@ export class UsageInstance {
     this.argsString = this.args.join(" ")
     if (this.source === "slash" || this.source === "console") {
       this.runnerTrusted = true
-    } else {
+    }
+    else {
       if (this.clientHandler.userClient.trimmedUUID === this.runnerUUID) {
         this.runnerTrusted = true
-      } else {
+      }
+      else {
         this.runnerTrusted = isTrusted(this.runnerUUID)
       }
     }

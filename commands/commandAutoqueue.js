@@ -6,11 +6,16 @@ export const requireTrust = false
 export async function run(usageInstance) {
   let autoQueue = usageInstance.clientHandler.autoQueue
   if (usageInstance.args.length === 0) {
-    if (autoQueue.requeueOnFinish) {
+    if (autoQueue.requeueOnOtherFinish) {
+      usageInstance.reply(`§7Automatic re-queueing is currently set to §crequeue on any player finishing§7.`)
+    }
+    else if (autoQueue.requeueOnFinish) {
       usageInstance.reply(`§7Automatic re-queueing is currently set to §crequeue on finish§7.`)
-    } else if (autoQueue.requeueAfterTime) {
+    }
+    else if (autoQueue.requeueAfterTime) {
       usageInstance.reply(`§7Automatic re-queueing is currently set to §crequeue after ${autoQueue.reQueueTime / 1000} seconds§7.`)
-    } else {
+    }
+    else {
       usageInstance.reply(`§7Automatic re-queueing is currently §cdisabled§7.`)
     }
     if (usageInstance.runnerTrusted) {
@@ -25,7 +30,8 @@ export async function run(usageInstance) {
   if (usageInstance.args[0] === "off") {
     autoQueue.setConfig("off")
     usageInstance.reply(`§7Automatic re-queueing is now §cdisabled§7.`)
-  } else if (usageInstance.args[0] === "time") {
+  }
+  else if (usageInstance.args[0] === "time") {
     if (usageInstance.args.length < 2) {
       usageInstance.reply(`§7You must specify a time.`)
       return
@@ -42,8 +48,8 @@ export async function run(usageInstance) {
     autoQueue.setConfig("finish")
     usageInstance.reply(`§7Automatic re-queueing is now set to §crequeue on finish§7.`)
   }
-  else if (usageInstance.args[0] === "ofinish" || usageInstance.args[0] === "of") {
-    autoQueue.setConfig("other_finish")
+  else if (usageInstance.args[0] === "afinish" || usageInstance.args[0] === "af") {
+    autoQueue.setConfig("any_finish")
     usageInstance.reply(`§7Automatic re-queueing is now set to §crequeue on any player finishing§7.`)
   }
   else {

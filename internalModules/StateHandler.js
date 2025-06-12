@@ -10,12 +10,17 @@ export class StateHandler extends EventEmitter {
     this.proxyClient = clientHandler.proxyClient
 
     this.state = "none"
+
+    this.gameState = null
+
+    this.mapset = null
     this.maps = null
-    this.startTime = null
+
+    this.startTime = null //
     this.lastSegmentTime = null
     this.times = null //map1, map2, map3, map4, map5
-    this.gameState = null
     this.totalTime = null
+
     this.lastFails = null
     this.hasSkip = null
     this.gameFails = null
@@ -26,16 +31,48 @@ export class StateHandler extends EventEmitter {
     this.lastServerLocraw = null
     this.locrawRetryCount = 0
     this.requestedLocraw = false
-    this.mapset = null
+
+
+    //no offense to lapis at all, but the event structures of this are pretty weird.
+    //a lot of the stuff i want to add would greatly benefit from having a fleshed out, well written statehandler
+    //im gonna rewrite a lot of this to remove redundant checks, make it more clear what everything is doing, and add more events
+
+    //these are all the events:
+      //"state" events, which update based on what state of dropper gameplay the player is in
+        //"none": in hypixel lobby or anything that isnt dropper server
+        //"waiting": waiting in a dropper lobby
+        //"countdown": waiting in the countdown sequence
+        //"playing": playing the game
+        //"finished": done with the game
+          //this finished event will also include the overall game performance data (meaning optional second param for state events) SHOULD I REALLY BE DOING THIS?? --------------------------------------
+      
+      //"player_join" event, which emits when any player joins the dropper lobby
+
+      //"player_finish" event, which emits when any player finishes the game, providing their name
+
+      //"map_finished" event, which emits when the player finishes (or skips) a map and provides information about that map run
+
+      //"fail" event, which emits when the player fails
+
+
+    //the statehandler will also keep track of:
+      //if the player is in a party, if they are the leader, and who is in the party
+      //the mapset for the dropper server
+    
+    
 
     this.bindEventListeners()
     this.bindModifiers()
   }
 
+
+
   bindModifiers() {
     this.clientHandler.incomingModifiers.push(this.handleIncomingPacketForChat.bind(this))
     this.clientHandler.incomingModifiers.push(this.handleIncomingPacketForActionBar.bind(this))
   }
+
+
 
   //called from ClientHandler once tickCounter has been created
   //a weird system like this has to be used because of a circular dependency between stateHandler and tickCounter
@@ -43,46 +80,52 @@ export class StateHandler extends EventEmitter {
     this.tickCounter = this.clientHandler.tickCounter
   }
 
+
+
   handleIncomingPacketForChat(data, meta) {
-    let actualMessage
-    if (meta.name === "chat") {
+    //get chat data standardized for versions
+    let actualMessage //where standardized message string will be stored
+    if (meta.name === "chat") { //<1.19.1
       if (data.position === 2) return
       actualMessage = data.message
     }
-    else if (meta.name === "system_chat") {
-      if ("type" in data && data.type !== 1) return
-      if ("isActionBar" in data && data.isActionBar === true) return
+    else if (meta.name === "system_chat") { //1.19.1+
+      if ("type" in data && data.type !== 1) return //1.19.1
+      if ("isActionBar" in data && data.isActionBar === true) return //1.19.2+
       actualMessage = data.content
     }
-    else return
+    else return //not chat packet
 
     let parsedMessage
     try {
-      parsedMessage = JSON.parse(actualMessage)
+      parsedMessage = JSON.parse(actualMessage)//parse message json
     }
     catch (error) {
       //invalid JSON, Hypixel sometimes sends invalid JSON with unescaped newlines
       return
     }
+
+    console.log(parsedMessage)
+
     //locraw response
-    checks: {
-      if (parsedMessage.extra) break checks
-      if (parsedMessage.color !== "white") break checks
+    locraw_response_check: {
+      if (parsedMessage.extra) break locraw_response_check
+      if (parsedMessage.color !== "white") break locraw_response_check
       let content = parsedMessage.text
       try {
         content = JSON.parse(content)
       }
       catch (error) {
-        break checks
+        break locraw_response_check
       }
-      if (typeof content?.server !== "string") break checks
-      if (!this.requestedLocraw) break checks
+      if (typeof content?.server !== "string") break locraw_response_check
+      if (!this.requestedLocraw) break locraw_response_check
       this.requestedLocraw = false
       if (content.server === "limbo" || content.server === this.lastServerLocraw) {
         this.locrawRetryCount++
         if (this.locrawRetryCount > 3) {
           //give up, we might actually be in limbo
-          return { //equivalent to breaking and cancelling packet
+          return { //cancel packet
             type: "cancel"
           }
         }
@@ -106,24 +149,15 @@ export class StateHandler extends EventEmitter {
         type: "cancel"
       }
     }
-    //the following check has been replaced with locraw
-    /*
-    //my user joining a game
-    checks: {
-      if (this.state !== "none") break checks
-      if (parsedMessage.extra?.length !== 14) break checks
-      if (parsedMessage.extra[4].text !== " has joined (") break checks
-      if (parsedMessage.extra[4].color !== "yellow") break checks
-      this.setState("waiting")
-    }
-    */
-    //game started, map list
-    checks: {
+
+
+    //countdown started, get map list
+    countdown_started_check: {
       //in rare cases, a join message can be sent after the game starts, meaning this won't work unless this check is removed
       //if (this.state !== "waiting") break checks
-      if (parsedMessage.extra?.length !== 10) break checks
-      if (parsedMessage.extra[0].text !== "Selected Maps: ") break checks
-      if (parsedMessage.extra[0].color !== "gray") break checks
+      if (parsedMessage.extra?.length !== 10) break countdown_started_check
+      if (parsedMessage.extra[0].text !== "Selected Maps: ") break countdown_started_check
+      if (parsedMessage.extra[0].color !== "gray") break countdown_started_check
       let maps = [
         parsedMessage.extra[1].text,
         parsedMessage.extra[3].text,
@@ -137,9 +171,11 @@ export class StateHandler extends EventEmitter {
       this.hasSkip = false
       this.gameFails = 0
       this.otherFinishCount = 0
-      this.setState("game")
+      this.setState("countdown")
       this.gameState = "waiting"
     }
+
+
     //countdown done, glass open
     checks: {
       if (this.state !== "game") break checks
@@ -156,13 +192,15 @@ export class StateHandler extends EventEmitter {
 
       this.emit("drop")
     }
+
+
     //map completed
-    checks: {
-      if (this.state !== "game") break checks
-      if (parsedMessage.extra?.length !== 5) break checks
-      if (parsedMessage.text !== "") break checks
-      if (!parsedMessage.extra[0].text.startsWith("You finished Map ")) break checks
-      if (parsedMessage.extra[0].color !== "gray") break checks
+    map_completed_check: {
+      if (this.state !== "game") break map_completed_check
+      if (parsedMessage.extra?.length !== 5) break map_completed_check
+      if (parsedMessage.text !== "") break map_completed_check
+      if (!parsedMessage.extra[0].text.startsWith("You finished Map ")) break map_completed_check
+      if (parsedMessage.extra[0].color !== "gray") break map_completed_check
       this.lastFails = 0
       let time = performance.now()
       //saved in a variable for info object
@@ -193,38 +231,9 @@ export class StateHandler extends EventEmitter {
       this.emit("time", infoObject)
       this.gameState++
     }
-    //game completed, used to extract Hypixel's time
-    checks: {
-      if (this.state !== "game") break checks
-      if (parsedMessage.extra?.length !== 3) break checks
-      if (parsedMessage.text !== "") break checks
-      if (parsedMessage.extra[0].text !== "You finished all maps in ") break checks
-      if (parsedMessage.extra[0].color !== "green") break checks
-      let timeText = parsedMessage.extra[1].text
-      let split = timeText.split(":")
-      let minutes = parseInt(split[0])
-      let seconds = parseInt(split[1])
-      let milliseconds = parseInt(split[2])
-      let time = minutes * 60000 + seconds * 1000 + milliseconds
-      this.totalTime = time
 
-      let realTime = performance.now() - this.startTime
-      this.realTime = realTime
-      let infoObject = {
-        hypixelTime: time,
-        realTime,
-        startTime: this.startTime,
-        endTime: this.lastSegmentTime,
-        hasSkip: this.hasSkip,
-        fails: this.gameFails,
-        place: this.otherFinishCount
-      }
-      if (!this.clientHandler.disableTickCounter) {
-        infoObject.ticks = this.tickCounter.tickCounts.reduce((partialSum, a) => partialSum + a, 0)
-      }
-      this.emit("gameEnd", infoObject)
-    }
-    //map skipped
+
+    //map skipped TO BE COMBINED WITH MAP COMPLETED CHECK ABOVE ----------------------------------------------
     checks: {
       if (this.state !== "game") break checks
       if (parsedMessage.extra?.length !== 3) break checks
@@ -261,19 +270,53 @@ export class StateHandler extends EventEmitter {
       this.gameState++
     }
 
-    //another user finishing
-    checks: {
-      if (this.state !== "game") break checks
-      if (!parsedMessage.extra) break checks
-      if (parsedMessage.extra.length < 4) break checks
-      if (parsedMessage.text !== "") break checks
-      if (parsedMessage.extra[parsedMessage.extra.length - 1].color !== "gray") break checks
-      if (parsedMessage.extra[parsedMessage.extra.length - 3].text === "finished all maps in ") {
-        this.otherFinishCount++
-        this.emit("other_finish")
+
+
+
+
+
+
+    
+    player_finish_check: { //checks if a player has completed the game (both other players and local player)
+      if (this.state !== "game") break player_finish_check
+      if (!parsedMessage.extra) break player_finish_check
+      if (parsedMessage.text !== "") break player_finish_check
+      if (parsedMessage.extra[parsedMessage.extra.length - 3].text === "finished all maps in ") { //someone else completed game
+        this.emit("player_finish", parsedMessage.extra[parsedMessage.extra.length - 5].text.split(" ").at(-1))
+      }
+      else if (parsedMessage.extra[0].text === "You finished all maps in ") { //we completed game
+        this.emit("player_finish", this.clientHandler.userClient.username)
+
+        let timeText = parsedMessage.extra[1].text //extract Hypixel's time
+        let split = timeText.split(":")
+        let minutes = parseInt(split[0])
+        let seconds = parseInt(split[1])
+        let milliseconds = parseInt(split[2])
+        let time = minutes * 60000 + seconds * 1000 + milliseconds
+        this.totalTime = time
+        let realTime = performance.now() - this.startTime
+        this.realTime = realTime
+        let infoObject = {
+          hypixelTime: time,
+          realTime,
+          startTime: this.startTime,
+          endTime: this.lastSegmentTime,
+          hasSkip: this.hasSkip,
+          fails: this.gameFails,
+          place: this.otherFinishCount
+        }
+        if (!this.clientHandler.disableTickCounter) {
+          infoObject.ticks = this.tickCounter.tickCounts.reduce((partialSum, a) => partialSum + a, 0)
+        }
+        this.emit("game_end", infoObject)
       }
     }
+
+
+
   }
+
+    
 
   handleIncomingPacketForActionBar(data, meta) {
     let actualMessage
@@ -313,13 +356,15 @@ export class StateHandler extends EventEmitter {
     }
   }
 
+
+
   bindEventListeners() {
     this.clientHandler.on("destroy", () => { //happens when client leaves game, reset state
       this.setState("none")
     })
 
     this.proxyClient.on("login", () => {
-      this.setState("none")
+      this.setState("none") //sets state back to none when changing servers
       if (this.tryLocrawTimeout) {
         clearTimeout(this.tryLocrawTimeout)
         this.tryLocrawTimeout = null
@@ -345,13 +390,9 @@ export class StateHandler extends EventEmitter {
 
   setState(state) { //basically whenever changing state this function is used to emit the state change event and update object variables if needed
     if (this.state === state) return
+    this.state = state
     if (state === "none") {
       this.mapset = null
-    }
-    this.state = state
-    this.emit("state", state)
-    this.emit(state)
-    if (state !== "game") {
       this.maps = null
       this.times = null
       this.gameState = null
@@ -363,5 +404,6 @@ export class StateHandler extends EventEmitter {
       this.otherFinishCount = null
       this.realTime = null
     }
+    this.emit("state", state)
   }
 }
