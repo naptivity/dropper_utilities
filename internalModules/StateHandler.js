@@ -61,7 +61,7 @@ export class StateHandler extends EventEmitter {
       //if the player is in a party, if they are the leader, and who is in the party
       //if they are the leader, who in the party is also running dropperutils (for distributed auto voting)
 
-      //the names of the players in your dropper lobby (for dodging and )
+      //the names of the players in your dropper lobby (for dodging and lobby hopping)
       
       //the amount of time left for the dropper match to start (if any)
       //the amount of players waiting in a dropper lobby

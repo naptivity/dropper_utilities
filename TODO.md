@@ -112,6 +112,9 @@
 - Figure out with Lapis if license is okay to delete
 
 
+- Remove contact Lapis for errors
+
+
 - Consider if eval command is worthwhile to keep
 
 

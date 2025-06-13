@@ -53,7 +53,8 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
     this.tabListHandler = new TabListHandler(this)
     this.autoVote = new AutoVote(this)
 
-
+    
+    console.log(userClient.username + " connected to the proxy")
 
     this.logPackets = false
     this.packetFilter = ["boss_bar", "ping", "pong", "keep_alive", "scoreboard_objective", "position",
@@ -61,14 +62,14 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
                           "sound_effect", "entity_teleport", "entity_metadata", "entity_update_attributes",
                           "teams", "look", "acknowledge_player_digging"]
     // this.withholdPackets = ["set_slot", ]
+    this.packetFilePrefix = "./packetCaptures/" + userClient.username + "packetcap.txt"
     this.clearPacketLogs()
-    console.log(userClient.username + " connected to the proxy")
 
     this.bindEventListeners()
   }
 
   clearPacketLogs() {
-    fs.writeFileSync("./packetCaptures/" + userClient.username + "packetcap.txt", "")
+    fs.writeFileSync(this.packetFilePrefix, "")
   }
 
   destroy() {
@@ -84,7 +85,7 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
 
     userClient.on("packet", (data, meta, buffer) => { //happens when recieving a packet from the USER (sent by the real minecraft client)
       if (this.logPackets && !this.packetFilter.includes(meta.name)) {
-        fs.appendFileSync("./packets.txt",
+        fs.appendFileSync(this.packetFilePrefix,
           "\n\n\n\n\n\n\n\nUSERCLIENT (SERVERBOUND/OUTGOING) - " + meta.state + " | " + meta.name + "\n\n" +
           "DATA\n" + JSON.stringify(data, null, 2) +"\n\n" +
           "META\n" + JSON.stringify(meta, null, 2) + "\n\n" +
@@ -116,7 +117,7 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
 
     proxyClient.on("packet", (data, meta, buffer) => { //happens when recieving a packet from hypixel (sent to the fake minecraft client)
       if (this.logPackets && !this.packetFilter.includes(meta.name)) {
-        fs.appendFileSync("./packets.txt",
+        fs.appendFileSync(this.packetFilePrefix,
           "\n\n\n\n\n\n\n\nPROXYCLIENT (CLIENTBOUND/INCOMING) - " + meta.state + " | " + meta.name + "\n\n" +
           "DATA\n" + JSON.stringify(data, null, 2) +"\n\n" +
           "META\n" + JSON.stringify(meta, null, 2) + "\n\n" +
