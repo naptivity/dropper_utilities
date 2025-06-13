@@ -108,7 +108,7 @@ export class AutoQueue {
   }
 
   bindEventListeners() {
-    this.stateHandler.on("state", state => {
+    this.stateHandler.on("game_state", state => {
       if (state === "none") return
       this.stopQueueing()
     })
@@ -137,7 +137,7 @@ export class AutoQueue {
         this.queueNewGame()
       }
     })
-    this.stateHandler.on("state", state => {
+    this.stateHandler.on("game_state", state => {
       if (state !== "game") {
         this.endRequeueTimeout()
       }

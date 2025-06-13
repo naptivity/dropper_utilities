@@ -79,12 +79,10 @@ Move features, FAQ, and maybe even setup to their own file and keep readme conci
 ## Features
 - `/dropper`, `/q`, and `/rq` can be used as a shortcut to play Dropper, instead of the long `/play arcade_dropper`.
 - `/dstats <optional user>` shows you someone's Dropper stats, or your own.
-- The amount of ticks you spend on each map (and all maps in total) is displayed. This is a network/server lag independent way to measure your time. (not yet supported on 1.18-1.18.2)
 - The action bar (text above your hotbar) displays more information about your run.
   - The map you're on, or if you're still waiting for the countdown, or if you've finished, is displayed at the start.
-  - If you've finished, the run time and real time is displayed next to it.
+  - If you've finished, the run time and real Hypixel time is displayed next to it.
   - Otherwise, the current run time and the time you've spent on the current map is displayed next to it.
-  - Displays number of ticks taken on the current map or the whole run.
 - Automatic requeuing can be enabled with `/arq`. You can configure the amount of time to requeue after, or requeue when you finish.
 - `/tc` will toggle party chat commands, allowing trusted users to control the bot while it's hosting a party.
 - `/cmds` to view a list of slash commands.

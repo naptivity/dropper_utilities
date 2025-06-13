@@ -77,7 +77,7 @@ export class TabListHandler {
         }
       }
     })
-    this.stateHandler.on("state", state => {
+    this.stateHandler.on("game_state", state => {
       if (state === "waiting") {
         this.checkPlayerList()
       }

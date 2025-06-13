@@ -68,7 +68,7 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
   }
 
   clearPacketLogs() {
-    fs.writeFileSync("./packets.txt", "")
+    fs.writeFileSync("./packetCaptures/" + userClient.username + "packetcap.txt", "")
   }
 
   destroy() {

@@ -71,15 +71,14 @@ export async function run(usageInstance) {
       let name = mapData.name
       let statsText = `§${colorCode}${name} §7statistics:\n`
       statsText += `Fastest time: §a${formatTime(mapData.time)}§7` //\n
+    }
+  }
       /*
       statsText += `Times completed: §a${stats.completed}§7\n`
       statsText += `Times skipped: §c${stats.skipped}`
       if (stats.fastestTime) {
         statsText += `§7\nFastest time: §a${formatTime(stats.fastestTime.value)}`
       }
-      if (stats.fastestTicks) {
-        statsText += `§7\nFastest ticks: §9${stats.fastestTicks.value}`
-      }*/
       messageExtraList.push({
         text: `[${name}]`,
         color,
@@ -121,4 +120,5 @@ export async function run(usageInstance) {
       extra: mapsByKey.undefined
     })
   }
+  */
 }

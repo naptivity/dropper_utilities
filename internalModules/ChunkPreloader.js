@@ -90,7 +90,7 @@ export class ChunkPreloader {
         this.active = true
       }, 1000)
     })
-    this.clientHandler.stateHandler.on("state", (state) => {
+    this.clientHandler.stateHandler.on("game_state", (state) => {
       if (state !== "game") this.active = false
     })
   }

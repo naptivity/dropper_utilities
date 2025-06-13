@@ -4,9 +4,13 @@
 
 
 - Make config file have control for ever feature being enabled or not (as promised in the warning) and maybe make it all able to be changed and saved ingame thru commands
+  - Add reset config file on next reboot option either in config file or in cli commands
+  - Make config refreshable/saveable with in game command
+  - Commands -> config autosave toggle
 
 
 - AutoVote toggle (see above)
+  - AutoVote only when less than 30s till game starts
 
 
 - Auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
@@ -15,8 +19,8 @@
 
 
 - Auto requeue when all players in the party have finished the game
-- Auto dodging when going for wins?
-  - Lilith style conditional lobby dodging based on player API stats (conditions set in config file)?
+- Auto dodging when going for wins
+  - Lilith style conditional lobby dodging based on player API stats (conditions set in config file)
 
 
 - Auto lobby hopping (/play arcade_dropper) based on player count in lobby, weighing past lobby options, and command cooldown restriction (bypassable?)
@@ -32,8 +36,14 @@
 
 
 - Prettier serverlist look
-  - Customizable MOTD/favicon?
+  - Customizable MOTD/favicon
   - Sync proxy server list playercount to number of people online on dropper https://minecraft.wiki/w/Java_Edition_protocol/Server_List_Ping
+
+
+- Kick on lose (u suck)
+
+
+- Show player stats in action bar while waiting in lobby
 
 
 - Track and save map times for performance measurement and allow viewing several performance insights through commands
@@ -43,9 +53,6 @@
 
 
 - Warning about new best level times being srcom performance worthy (use srcom api w/ caching)
-
-
-- Add reset config file on next reboot option either in config file or in cli commands
 
 
 - Update perfectmaps to work with mapsets
@@ -69,11 +76,22 @@
 
 ### Technical:
 - Fix/improve StateHandler (top prio, literally everything is broken until thats fixed)
+- Update all StateHandler deps to use new structure
 
 
 - Replace AutoVote.js mapset identifier with StateHandler.js mapset identifier (once implemented)
 - Figure out why AutoVote sometimes just shits itself (misses chat messages, sends throttle message twice, doesn't say cancelling if match started)
   - Improve the way AutoVote reads chat messages?
+- Make AutoVote cancel faster if you close the window (clearing vote throttle timeout with clearTimeout)
+
+
+- Make the packet logger output into a folder, with different files for each player (and make the formatting better like minimizing newlines and adding toggleable buffer)
+  - Move packet logger filter to config, make both blacklist and whitelist filters
+  - Add packet capture start times
+  - Add numbers for each capture, maybe times too
+  - Add dates and times to capture filenames
+  - Keep entire capture file in json?
+  - Packet capture break after certain packet?
 
 
 - Fix duplicate lost connection message showing in console, show what user left

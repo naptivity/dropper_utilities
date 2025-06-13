@@ -4,7 +4,7 @@ import faviconText from "./static/favicon.js" //import base 64 encoded version o
 import minecraftData from "minecraft-data" //contains all minecraft metadata and stuff, only used to convert protocol version to normal version in this case
 import { config } from "./configHandler.js" //import all the variables 
 
-const supportedString = "1.8-1.8.9 and 1.19-1.21.4" //not 1.21.5 yet because node-minecraft-protocol doesnt support it
+const supportedString = "1.8-1.8.9 and 1.19-1.20.1" //not 1.21.5 yet because node-minecraft-protocol doesnt support it (and 1.20.2+ is broken)
 
 //https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/docs/API.md
 export class Proxy { //remember that export is what makes objects methods and variables importable by other sections of the program so this class is only actually imported and run in index.js

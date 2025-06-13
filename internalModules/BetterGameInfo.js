@@ -6,7 +6,6 @@ export class BetterGameInfo {
     this.userClient = clientHandler.userClient
     this.proxyClient = clientHandler.proxyClient
     this.stateHandler = clientHandler.stateHandler
-    if (!this.clientHandler.disableTickCounter) this.tickCounter = clientHandler.tickCounter
 
     this.sendInterval = null
 
@@ -34,7 +33,7 @@ export class BetterGameInfo {
   }
 
   bindEventListeners() {
-    this.stateHandler.on("state", state => {
+    this.stateHandler.on("game_state", state => {
       if (state === "game") {
         if (!this.sendInterval) {
           this.sendInterval = setInterval(() => {
@@ -49,19 +48,11 @@ export class BetterGameInfo {
         }
       }
     })
-    if (!this.clientHandler.disableTickCounter) {
-      this.tickCounter.on("tick", () => {
-        this.sendActionBar()
-      })
-      this.tickCounter.on("tickReset", () => {
-        this.sendActionBar()
-      })
-    }
   }
 
   sendActionBar() {
     let text = "§a"
-    let state = this.stateHandler.gameState
+    let state = this.stateHandler.gameState //THIS IS WHAT USED TO COUNT UP AS YOU FINISHED MAPS, MAKE IT DEPEND ON THE LIST OF TIMES INSTEAD
     if (state === "waiting") {
       state = "Waiting"
     }
@@ -103,12 +94,6 @@ export class BetterGameInfo {
     if (state !== "Waiting" && state !== "Finished") {
       let mapTime = formatTime(performance.now() - this.stateHandler.lastSegmentTime)
       text += " Map Time: §a" + mapTime + "§f"
-      if (!this.clientHandler.disableTickCounter) {
-        text += " Ticks: §9" + this.tickCounter.currentTickCount + "§f"
-      }
-    }
-    else if (state === "Finished" && !this.clientHandler.disableTickCounter) {
-      text += " Ticks: §9" + this.tickCounter.tickCounts.reduce((partialSum, a) => partialSum + a, 0) + "§f"
     }
     this.clientHandler.sendClientActionBar({
       text
