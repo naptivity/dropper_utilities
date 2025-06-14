@@ -25,8 +25,6 @@ import * as commandEval from "./commandEval.js"
 list.push(commandEval)
 import * as commandExit from "./commandExit.js"
 list.push(commandExit)
-import * as commandTps from "./commandTps.js"
-list.push(commandTps)
 import * as commandPing from "./commandPing.js"
 list.push(commandPing)
 import * as commandStatistics from "./commandStatistics.js"

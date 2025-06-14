@@ -84,14 +84,13 @@ export class ChunkPreloader {
   }
 
   bindEventListeners() {
-    this.clientHandler.stateHandler.on("game", () => {
-      setTimeout(() => {
-        if (this.clientHandler.stateHandler.state !== "game") return
-        this.active = true
-      }, 1000)
-    })
-    this.clientHandler.stateHandler.on("game_state", (state) => {
-      if (state !== "game") this.active = false
+    this.clientHandler.stateHandler.on("game_state", state => {
+      if (state === "countdown") {
+        setTimeout(() => {
+          this.active = true
+        }, 1000)
+      }
+      else if (state !== "playing" && state !== "countdown") this.active = false
     })
   }
 }

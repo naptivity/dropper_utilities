@@ -27,6 +27,7 @@
   - 9+ players means stay imo at least for a simple algorithm
   - On second thought, if no player has joined a lobby in a while, it means all players are getting dumped into another lobby, so maybe do analysis on Hypixel's server/player distribution algorithm and try to use that to determine whether a lobby will reach 12 soon enough
   - Alternatively just make it so that the rejoin spam cooldown resets whenever a player joins even if it's not known how long Hypixel waits to reroute players or whatever
+  - Don't requeue less than every 5 seconds, 5 seconds is the perfect time to always requeue without throttle
 
 
 - Dropper API
@@ -35,27 +36,35 @@
   - State win/completion ratios
 
 
+- Show player stats in action bar while waiting in lobby (configurable style)
+
+
 - Prettier serverlist look
   - Customizable MOTD/favicon
   - Sync proxy server list playercount to number of people online on dropper https://minecraft.wiki/w/Java_Edition_protocol/Server_List_Ping
 
 
+- Don't ARQ if finished below certain time, or if player finishes below certain time
+
+
 - Kick on lose (u suck)
 
 
-- Show player stats in action bar while waiting in lobby
+- Customizable dropperutils name maybe lol
+
+
+- Make StateHandler be able to track more than 5 maps (private game)
+  - Make sure StateHandler deals fine with the possibility of 10 minutes no finish, or just not finishing in general
 
 
 - Track and save map times for performance measurement and allow viewing several performance insights through commands
-
-
-- Real time leaderboard based on player last seen positions (ambitious)
 
 
 - Warning about new best level times being srcom performance worthy (use srcom api w/ caching)
 
 
 - Update perfectmaps to work with mapsets
+  - Update perfectmaps to work with new StateHandler
 
 
 - Big text on screen saying what map it is when u transfer since I forgot to check lol
@@ -69,7 +78,9 @@
 
 - Auto hide players when starting game, maybe also including completely hide players (in waiting lobby) for races or playing without competitive pressure 
 
-
+#### Ambitious:
+- Real time leaderboard based on player last seen positions
+- Allow you to practice maps while waiting in dropper lobby?
 - Make a mode that makes everything barrier block or invis (like Mineshaft Hypixel bug) so that you play blind to the map but based on memory basically equivalent to invis level in GD lmao https://www.youtube.com/watch?v=76W21QIrMBg
 
 
@@ -82,7 +93,8 @@
 - Replace AutoVote.js mapset identifier with StateHandler.js mapset identifier (once implemented)
 - Figure out why AutoVote sometimes just shits itself (misses chat messages, sends throttle message twice, doesn't say cancelling if match started)
   - Improve the way AutoVote reads chat messages?
-- Make AutoVote cancel faster if you close the window (clearing vote throttle timeout with clearTimeout)
+- Make AutoVote cancel faster if you close the window (clearing vote throttle timeout with clearTimeout, using a system entirely based on timeouts)
+- Make AutoVote retry every 3 seconds since that seems to be cooldown time? To keep chat cleaner
 
 
 - Make the packet logger output into a folder, with different files for each player (and make the formatting better like minimizing newlines and adding toggleable buffer)

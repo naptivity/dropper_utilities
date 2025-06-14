@@ -243,6 +243,7 @@ export class AutoVote {
   bindEventListeners() {
     this.clientHandler.stateHandler.on("game_state", state => {
       if (state === "waiting") { //when entered a game lobby and waiting
+        console.log(this.clientHandler.stateHandler.mapset)
         this.autoVoted = false //make sure we are able to process the necessary packets
         this.completedWindowIds = [] //reset windows that have been seen before since it resets on server transfer
         this.clientHandler.sendCustomServerPacket("held_item_slot", held_item_slot) //sets hand slot to 0 (for server)

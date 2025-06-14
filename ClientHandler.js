@@ -63,7 +63,7 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
                           "teams", "look", "acknowledge_player_digging"]
     // this.withholdPackets = ["set_slot", ]
     this.packetFilePrefix = "./packetCaptures/" + userClient.username + "packetcap.txt"
-    this.clearPacketLogs()
+    // this.clearPacketLogs()
 
     this.bindEventListeners()
   }

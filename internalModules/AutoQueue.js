@@ -11,23 +11,26 @@ export class AutoQueue {
 
     this.isQueueing = false
     this.queueInterval = null
+
     this.requirePerfectMaps = false
     this.perfectMaps = null
+
+    this.requeueOnFinish = false
+    this.requeueOnAnyFinish = false
     
     this.requeueAfterTime = false
     this.reQueueTimeout = null
     this.reQueueTime = 45000
 
-    this.requeueOnFinish = false
-    this.requeueOnAnyFinish = false
-
     this.bindEventListeners()
   }
+
 
   disablePerfectMapRequirement() {
     this.requirePerfectMaps = false
   }
 
+  
   enablePerfectMapRequirement(config) {
     let status
     let list = perfectMapsLists[config]
@@ -50,6 +53,7 @@ export class AutoQueue {
       list
     }
   }
+
 
   setConfig(type, value) {
     if (type === "off") {
@@ -85,6 +89,7 @@ export class AutoQueue {
     }
   }
 
+
   queueNewGame() {
     if (this.isQueueing) return
     this.isQueueing = true
@@ -94,6 +99,7 @@ export class AutoQueue {
     }, 5200)
   }
 
+
   stopQueueing() {
     if (!this.isQueueing) return
     this.isQueueing = false
@@ -101,47 +107,58 @@ export class AutoQueue {
     this.queueInterval = null
   }
 
+
   endRequeueTimeout() {
     if (!this.reQueueTimeout) return
     clearTimeout(this.reQueueTimeout)
     this.reQueueTimeout = null
   }
 
+
   bindEventListeners() {
     this.stateHandler.on("game_state", state => {
       if (state === "none") return
       this.stopQueueing()
     })
-    this.stateHandler.on("game", () => {
+
+    this.stateHandler.on("game_state", state => {
+      if (state === "countdown") return
       if (this.requirePerfectMaps) {
-        if (!this.perfectMaps.includes(this.stateHandler.maps.join(", "))) {
+        if (!this.perfectMaps.includes(this.stateHandler.maps.join(", "))) { //fix perfectmaps to work with new statehandler
           this.queueNewGame()
           return
         }
       }
     })
-    this.stateHandler.on("drop", () => {
-      if (this.requeueAfterTime) {
-        this.reQueueTimeout = setTimeout(() => {
+
+    this.stateHandler.on("game_state", state => {
+      if (state !== "playing") return //when we recieve the playing event (game start)
+      if (this.requeueAfterTime) { //if option is set to queue after certain time
+        this.reQueueTimeout = setTimeout(() => { //set a timeout that will requeue in that amount of time
           this.queueNewGame()
         }, this.reQueueTime)
       }
     })
-    this.stateHandler.on("game_end", () => {
+
+    this.stateHandler.on("game_state", state => {
+      if (state !== "playing") return
       if (this.requeueOnFinish) {
         this.queueNewGame()
       }
     })
+
     this.stateHandler.on("player_finish", () => {
       if (this.requeueOnAnyFinish) {
         this.queueNewGame()
       }
     })
-    this.stateHandler.on("game_state", state => {
-      if (state !== "game") {
-        this.endRequeueTimeout()
-      }
-    })
+
+    // this.stateHandler.on("game_state", state => {
+    //   if (state === "countdown") {
+    //     this.endRequeueTimeout()
+    //   }
+    // })
+
     this.proxyClient.on("chat", data => {
       if (data.position === 2) return
       let parsedMessage
@@ -160,6 +177,7 @@ export class AutoQueue {
         this.clientHandler.sendServerCommand("p kickoffline")
       }
     })
+
     this.clientHandler.on("destroy", () => {
       this.stopQueueing()
     })
