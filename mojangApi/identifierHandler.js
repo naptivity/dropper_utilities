@@ -26,7 +26,8 @@ class IdentifierHandler {
       let profileInfo
       try {
         profileInfo = await lookupFromUUID(normalized.value)
-      } catch (error) {
+      }
+      catch (error) {
         throw new Error("Unable to lookup identifier")
       }
       if (!profileInfo) return null
@@ -40,7 +41,8 @@ class IdentifierHandler {
       let profileInfo
       try {
         profileInfo = await lookupFromName(normalized.value)
-      } catch (error) {
+      }
+      catch (error) {
         throw new Error("Unable to lookup identifier")
       }
       if (!profileInfo) return null

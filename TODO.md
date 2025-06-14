@@ -86,10 +86,6 @@
 
 
 ### Technical:
-- Fix/improve StateHandler (top prio, literally everything is broken until thats fixed)
-- Update all StateHandler deps to use new structure
-
-
 - Replace AutoVote.js mapset identifier with StateHandler.js mapset identifier (once implemented)
 - Figure out why AutoVote sometimes just shits itself (misses chat messages, sends throttle message twice, doesn't say cancelling if match started)
   - Improve the way AutoVote reads chat messages?

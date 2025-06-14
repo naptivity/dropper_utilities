@@ -114,36 +114,13 @@ export class AutoVote {
 
   async triggerAutoVote(data, meta) {
     this.completedWindowIds.push(data.windowId)
-    let sampleMap = this.standardizeMapName(JSON.parse(data.items[11].nbtData.value.display.value.Name.value).extra[0].text) //slot 11 will always have a map name item so we use that to determine mapset
     let autoVoteMaps = null
-    //if statement checks if that sample map name is in each mapset and once it finds the mapset its in it sets those maps to auto vote
-    if (fantasyMapset[sampleMap]) {
-      autoVoteMaps = autoVoteMapsLists.fantasy
-      this.clientHandler.sendClientMessage({
-        text: `§9DropperUtilities > §rMapset: Fantasy`
-      })
-    }
-    else if (abstractMapset[sampleMap]) {
-      autoVoteMaps = autoVoteMapsLists.abstract
-      this.clientHandler.sendClientMessage({
-        text: `§9DropperUtilities > §rMapset: Abstract`
-      })
-    }
-    else if (landscapeMapset[sampleMap]) {
-      autoVoteMaps = autoVoteMapsLists.landscape
-      this.clientHandler.sendClientMessage({
-        text: `§9DropperUtilities > §rMapset: Landscape`
-      })
-    }
-    else if (futuristicMapset[sampleMap]) {
-      autoVoteMaps = autoVoteMapsLists.futuristic
-      this.clientHandler.sendClientMessage({
-        text: `§9DropperUtilities > §rMapset: Futuristic`
-      })
-    }
-    else {
-      throw new Error("The sample map item in the voting GUI (item slot 11, top-leftmost apparently isn't in any mapset or wasn't standardized correctly)") //the name isnt in any of the mapsets??
-    }
+    
+    let mapset = this.clientHandler.stateHandler.mapset
+    autoVoteMaps = autoVoteMapsLists[mapset.toLowerCase()]
+    this.clientHandler.sendClientMessage({
+      text: `§9DropperUtilities > §rMapset: ` + mapset
+    })
 
 
     //here is where it should figure out which 3 to vote

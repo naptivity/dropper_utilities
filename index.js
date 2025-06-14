@@ -15,7 +15,8 @@ process.on("uncaughtException", (error, origin) => { //catches uncaught exceptio
   try {
     rl.close()
     proxy.destroy() //stop proxy on error
-  } catch (error) {
+  }
+  catch (error) {
     
   }
   //keep process alive so the window doesn't close if this is being ran in the .exe

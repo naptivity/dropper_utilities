@@ -1,8 +1,8 @@
-import { commandListString, list as commandList } from "./list.js"
+import { commandListString, list as commandList } from "./commandList.js"
 
-export const name = "commands"
-export const aliases = ["cmds", "cmdinfo"]
-export const allowedSources = ["slash"] //specifically for slash commands, does not include "help" or "h"
+export const name = "help"
+export const aliases = ["h", "commands", "cmds", "cmdinfo"]
+export const allowedSources = ["console", "party"] //not a slash command so it doesn't conflict with the server's /help command
 export const description = "View the list of commands or help for a specific command"
 export const requireTrust = false
 export async function run(usageInstance) {

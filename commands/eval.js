@@ -2,7 +2,7 @@
 import * as trustedImport from "../data/trusted.js"
 import * as identifierHandlerImport from "../mojangApi/identifierHandler.js"
 import * as dataHandlerImport from "../data/dataHandler.js"
-import * as commandsImport from "./list.js"
+import * as commandsImport from "./commandList.js"
 import * as commandHandlerImport from "./handler.js"
 import * as utilsImport from "../utils/utils.js"
 import * as persistentFetchImport from "../utils/persistentFetch.js"
@@ -25,7 +25,8 @@ export async function run(usageInstance) {
   //use console.log directly to bypass formatting
   try {
     console.log(eval(usageInstance.argsString))
-  } catch (error) {
+  }
+  catch (error) {
     console.log(error)
   }
 }

@@ -22,7 +22,8 @@ async function doInternalFetch(url, options, attemptsRemaining, resolve, reject)
         reject(res)
       }
     }
-  } catch (error) {
+  }
+  catch (error) {
     if (attemptsRemaining > 0) {
       doInternalFetch(url, options, attemptsRemaining - 1, resolve, reject)
     }

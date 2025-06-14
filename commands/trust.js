@@ -21,7 +21,8 @@ export async function run(usageInstance) {
     let names
     try {
       names = await Promise.all(promises)
-    } catch (error) {
+    }
+    catch (error) {
       //as a backup, display UUIDs if name lookup failed
       usageInstance.reply(`§cUnable to fetch usernames. Trusted users: §c${trustedList.join(", ")}§7.`)
       return
@@ -41,7 +42,8 @@ export async function run(usageInstance) {
     let info
     try {
       info = await getInfo(user)
-    } catch (error) {
+    }
+    catch (error) {
       usageInstance.reply(`§cUnable to fetch Mojang API data. Try again in a second.`)
       return
     }
@@ -69,7 +71,8 @@ export async function run(usageInstance) {
     let info
     try {
       info = await getInfo(user)
-    } catch (error) {
+    }
+    catch (error) {
       usageInstance.reply(`§cUnable to fetch Mojang API data. Try again in a second.`)
       return
     }

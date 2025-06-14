@@ -11,7 +11,8 @@ try {
   if (tempChunks.dropperVersion !== currentDropperVersion) throw new Error({code: "OUTDATED_CHUNKS"})
   replaceChunks(tempChunks)
   chunksFileWorking = true
-} catch (error) {
+}
+catch (error) {
   console.log("No valid chunks.json found. Creating a new file. (Error code: " + error.code + ")")
   //create fresh data
   let tempChunks = {
@@ -22,7 +23,8 @@ try {
   try {
     fs.writeFileSync("./chunks.json", JSON.stringify(chunks, null, 2))
     chunksFileWorking = true
-  } catch (error) {
+  }
+  catch (error) {
     console.log("Unable to create chunks.json. (Error code: " + error.code + ")")
     console.log("Make sure this executable is being ran inside of a folder that it can write to.")
     console.log("Cached chunks will not be saved on restart.")

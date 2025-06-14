@@ -8,7 +8,8 @@ try {
   tempData = JSON.parse(tempData)
   replaceData(tempData)
   dataFileWorking = true
-} catch (error) {
+}
+catch (error) {
   console.log("No valid data.json found. Creating a new file. (Error code: " + error.code + ")")
   //create fresh data
   let tempData = {
@@ -18,7 +19,8 @@ try {
   try {
     fs.writeFileSync("./data.json", JSON.stringify(data, null, 2))
     dataFileWorking = true
-  } catch (error) {
+  }
+  catch (error) {
     console.log("Unable to create data.json. (Error code: " + error.code + ")")
     console.log("Make sure this executable is being ran inside of a folder that it can write to.")
     console.log("Data (such as trusted users) will not be saved on restart.")
