@@ -30,8 +30,8 @@ export class StateHandler extends EventEmitter {
 
 
     this.isFirstLogin = true
-    this.requestedLocraw = false
 
+    this.requestedLocraw = false
 
     this.isPartyLeader = null
     this.partyMemberList = null
@@ -125,34 +125,6 @@ export class StateHandler extends EventEmitter {
     // console.log(parsedMessage) //crazy how useful this is for chat packet reading and debug lmaoooo
 
 
-    locraw_response_check: { //checking if chat is a locraw response and parsing it if so
-      if (!this.requestedLocraw) break locraw_response_check //we didnt request a locraw check
-      if (parsedMessage.extra) break locraw_response_check //locraw is just text field
-      if (parsedMessage.color !== "white") break locraw_response_check //locraw is always white
-      let locraw_content = parsedMessage.text 
-      try {
-        locraw_content = JSON.parse(locraw_content) //parse locraw text since its json format
-      }
-      catch (error) {
-        break locraw_response_check
-      }
-
-      if (!locraw_content.server) break locraw_response_check //locraw string didnt respond with server field (shouldnt happen but doesnt hurt to check)
-      if (typeof locraw_content.server !== "string") break locraw_response_check //locraw should always be string
-      this.requestedLocraw = false //we are handling the locraw response so we can reset the flag
-      if (!locraw_content.gametype || !locraw_content.mode || locraw_content.gametype !== "ARCADE" || locraw_content.mode !== "DROPPER") { //checking if locraw says we aren't in dropper lobby
-        this.setGameState("none")
-      }
-      else { //we are in dropper lobby
-        this.mapset = locraw_content.map //locraw provides the mapset
-        if (this.game_state === "none") this.setGameState("waiting") //since we are in a dropper lobby, set the state to waiting (state gets reset to none on every login so this check wont break stuff)
-      }
-      return {
-        type: "cancel" //stops locraw packet from reaching user
-      }
-    }
-
-
     party_list_response_check: { //checking if chat is one of the many party list responses and parsing/hiding if so
       if (!this.requestedPartyList) break party_list_response_check //we didnt request a party list check
 
@@ -163,7 +135,6 @@ export class StateHandler extends EventEmitter {
             if (this.updatedPartyList) { //if the party list was updated, this is the second instance of this message
               this.updatedPartyList = false //flip the flag, preventing other lines like this from being hidden
               this.requestedPartyList = false //the party list request was handled, so flip the flag
-              if (this.isPartyLeader) requestUtilsCheck()
               // console.log("\n\nParty list check completed for", this.clientHandler.userClient.username)
               // console.log("isPartyLeader:", this.isPartyLeader)
               // console.log("partyMemberList:", this.partyMemberList)
@@ -270,6 +241,38 @@ export class StateHandler extends EventEmitter {
     }
 
 
+    locraw_response_check: { //checking if chat is a locraw response and parsing it if so
+      if (!this.requestedLocraw) break locraw_response_check //we didnt request a locraw check
+      if (parsedMessage.extra) break locraw_response_check //locraw is just text field
+      if (parsedMessage.color !== "white") break locraw_response_check //locraw is always white
+      let locraw_content = parsedMessage.text 
+      try {
+        locraw_content = JSON.parse(locraw_content) //parse locraw text since its json format
+      }
+      catch (error) {
+        break locraw_response_check
+      }
+
+      if (!locraw_content.server) break locraw_response_check //locraw string didnt respond with server field (shouldnt happen but doesnt hurt to check)
+      if (typeof locraw_content.server !== "string") break locraw_response_check //locraw should always be string
+      this.requestedLocraw = false //we are handling the locraw response so we can reset the flag
+      if (!locraw_content.gametype || !locraw_content.mode || locraw_content.gametype !== "ARCADE" || locraw_content.mode !== "DROPPER") { //checking if locraw says we aren't in dropper lobby
+        this.setGameState("none")
+      }
+      else { //we are in dropper lobby
+        this.mapset = locraw_content.map //locraw provides the mapset
+        if (this.game_state === "none") {
+          this.setGameState("waiting") //since we are in a dropper lobby, set the state to waiting (state gets reset to none on every login so this check wont break stuff)
+          if (this.isPartyLeader) requestUtilsCheck() //request utils check if party leader, only when waiting in dropper lobby (for voting)
+        }
+        
+      }
+      return {
+        type: "cancel" //stops locraw packet from reaching user
+      }
+    }
+
+
     party_update_check: { //logic that will retrigger party list check if someone leaves/joins party (or various other changes that can happen), refreshing member list, leader statuses, and online/offline statuses
       if (this.requestedPartyList) break party_update_check //what are the odds that any of these happen while a check is happening... well reasonably high but i guess we'll just ignore it worst case the variables are a little outdated shouldnt affect much
 
@@ -278,6 +281,7 @@ export class StateHandler extends EventEmitter {
           //if the party was updated, this is the second instance of this message, so trigger the party list refresh again
           //we dont trigger it right when we see the message because the party update logic will hide the second blue line and it will look ugly lol
           //i believe this might also stop the check from running multiple times if multiple people get kicked from /p kickoffline? no clue tho
+          //also noticed that this prevents a timed out party update request from getting rid of blue lines on duplicate update messages (like a player leaving and the party also disbanding, but the disband message has no blue lines)
           setTimeout(() => {
             this.partyUpdate = false
             this.requestPartyList() //actually request the update
@@ -285,7 +289,7 @@ export class StateHandler extends EventEmitter {
           }, 2000) //waits 2 seconds because Hypixel tends to reject the command if we send it right after another command (if you are the person kicking someone else, you send the p list command in quick succession to p kick)
           //also, only after adding this delay, i discovered the online status in /p list doesnt update for a bit after someone leaves, so this delay is necessary to get accurate online info lol (1.5 was too quick but 2 seems to be slow enough)
           //the delay shouldnt affect much, as long as it eventually makes the update
-          break party_update_check
+          return
         }
       }
 
@@ -321,6 +325,7 @@ export class StateHandler extends EventEmitter {
           else break party_update_check
         }
       }
+      if (this.partyUpdate) return
     }
 
 
@@ -338,7 +343,7 @@ export class StateHandler extends EventEmitter {
 
     countdown_started_check: { //checking if game countdown started and subsequently getting map list
       //dont check if state waiting because apparently player can sometimes join after countdown starts
-      if (!parsedMessage.extra) return //map list has extra property
+      if (!parsedMessage.extra) break countdown_started_check //map list has extra property
       if (parsedMessage.extra.length !== 10) break countdown_started_check //extra length is always 10 
       if (parsedMessage.extra[0].text !== "Selected Maps: ") break countdown_started_check //text always starts with that string
       if (parsedMessage.extra[0].color !== "gray") break countdown_started_check //color is always gray
@@ -582,6 +587,8 @@ export class StateHandler extends EventEmitter {
     //   console.log(this.hypixelMapTimes)
     //   console.log(this.realTotalTime)
     //   console.log(this.hypixelTotalTime)
+    // console.log(this.isPartyLeader)
+    // console.log(this.partyMemberList)
     // }
     this.emit("game_state", state) //emit game state event
     // console.log("emitted game_state", state)

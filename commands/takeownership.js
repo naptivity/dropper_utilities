@@ -9,5 +9,8 @@ export async function run(commandHandler) {
     return
   }
   commandHandler.reply(`§7Attempting to give you party ownership...`)
-  commandHandler.clientHandler.partyChatThrottle.addToQueue(`/p transfer ${commandHandler.runnerUUID}`)
+  // commandHandler.clientHandler.partyChatThrottle.addToQueue(`/p transfer ${commandHandler.runnerUUID}`)
+  setTimeout(() => {
+    this.clientHandler.sendServerCommand(`p transfer ${commandHandler.runnerUUID}`)
+  }, 250) //wait 250 to send party chat to mimic partychatthrottle, funny thing is this isnt even party chat just party command lmao
 }

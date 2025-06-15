@@ -56,9 +56,9 @@ export class CommandInstance {
       await this.command.run(this)
     }
     catch (error) {
-      console.log("--- An exception occurred, please report this to Lapis#7110 on Discord ---")
+      console.log("--- An exception occurred, please report this to naptivity on Discord ---")
       console.error(error)
-      console.log("--- An exception occurred, please report this to Lapis#7110 on Discord ---")
+      console.log("--- An exception occurred, please report this to naptivity on Discord ---")
       this.reply("§cAn error occured while running that command, check the console window for more information.")
     }
     this.running = false
@@ -74,7 +74,10 @@ export class CommandInstance {
     else if (this.source === "party") {
       if (this.clientHandler.destroyed) return
       text = removeFormattingCodes(text)
-      this.clientHandler.partyChatThrottle.addToQueue("/pc " + text)
+      setTimeout(() => {
+        this.clientHandler.sendServerPartyChat(text)
+      }, 250) //wait 250 to send party chat to mimic partychatthrottle
+      // this.clientHandler.partyChatThrottle.addToQueue("/pc " + text)
     }
     else if (this.source === "console") {
       //TODO: translate to ANSI color codes for console

@@ -7,96 +7,98 @@ export class BetterGameInfo {
     this.proxyClient = clientHandler.proxyClient
     this.stateHandler = clientHandler.stateHandler
 
-    this.sendInterval = null
-
-    this.bindEventListeners()
     this.bindModifiers()
   }
 
+  
   bindModifiers() {
     this.clientHandler.incomingModifiers.push(this.handleIncomingPacket.bind(this))
   }
 
+
   handleIncomingPacket(data, meta) {
-    if (meta.name === "chat") {
+    let state = this.stateHandler.game_state
+    if (state !== "playing" && state !== "finished") return //should only be editing action bar when playing or finished
+    let mapNumber = this.stateHandler.hypixelMapTimes.length //get number of map we are on based on length of times list
+
+    let legacyPacket = null //will report whether it's a legacy (<1.19.1) packet or not
+
+    let actualMessage
+    if (meta.name === "chat") { //<1.19.1
       if (data.position !== 2) return
-      if (this.stateHandler.state === "game") return {
-        type: "cancel"
-      }
+      actualMessage = data.message
+      legacyPacket = true
     }
-    if (meta.name === "system_chat") {
+    else if (meta.name === "system_chat") { //1.19.1+
       if (data.type !== 2 && !data.isActionBar) return
-      if (this.stateHandler.state === "game") return {
-        type: "cancel"
-      }
+      actualMessage = data.content
+      legacyPacket = false
     }
-  }
+    else return //not actionbar packet
+    
+    let parsedMessage
+    try {
+      parsedMessage = JSON.parse(actualMessage) //parse actionbar json
+    }
+    catch (error) { //invalid JSON, Hypixel sometimes sends invalid JSON with unescaped newlines
+      return 
+    }
 
-  bindEventListeners() {
-    this.stateHandler.on("game_state", state => {
-      if (state === "game") {
-        if (!this.sendInterval) {
-          this.sendInterval = setInterval(() => {
-            this.sendActionBar()
-          }, 10)
-        }
-      }
-      else {
-        if (this.sendInterval) {
-          clearInterval(this.sendInterval)
-          this.sendInterval = null
-        }
-      }
-    })
-  }
 
-  sendActionBar() {
-    let text = "§a"
-    let state = this.stateHandler.gameState //THIS IS WHAT USED TO COUNT UP AS YOU FINISHED MAPS, MAKE IT DEPEND ON THE LIST OF TIMES INSTEAD
-    if (state === "waiting") {
-      state = "Waiting"
-    }
-    else if (state === 5) {
-      state = "Finished"
-    }
-    if (state === "Waiting") {
-      text += "Countdown§8"
-    }
-    else if (state === "Finished") {
-      text += "Finished§8"
+    let text = "§a" //green format code
+
+    if (state === "finished") {
+      text += "Finished" 
     }
     else {
-      text += "Map " + (state + 1) + "§8"
+      text += "Map " + mapNumber
     }
-    text += " -§f"
-    let runTime
-    if (state === "Finished") {
-      if (this.stateHandler.totalTime !== null) {
-        runTime = formatTime(this.stateHandler.totalTime)
+
+    text += " §7- " //gray dash between every data point
+
+    let runTime //create variable that will hold real total time
+    if (state === "finished") { //if we are finished
+      if (this.stateHandler.realTotalTime !== null) { //if statehandler has gotten total time already
+        runTime = formatTime(this.stateHandler.realTotalTime) //give real total time
       }
-      else {
-        //estimate the total time from a sum of each segment if we haven't gotten the chat message with Hypixel's time yet
-        let totalTime = this.stateHandler.times.reduce((partialSum, a) => partialSum + a, 0)
-        runTime = formatTime(totalTime)
+      else { //we will just add 00:00:00 real total time if we havent gotten it from statehandler yet
+        runTime = formatTime(0)
       }
     }
-    else if (state === "Waiting") {
-      runTime = "00:00.000"
+    else { //if we are still playing
+      runTime = formatTime(performance.now() - this.stateHandler.gameStartTime) //give time since start to now
+    }
+    text += "§fReal Total Time: §a" + runTime + "§f" //
+    
+    text += " §7- §fHypixel " //gray dash between every data point, also put Hypixel Map Time or Hypixel Total Time
+
+    text += parsedMessage.text.slice(0, parsedMessage.text.slice(0, parsedMessage.text.lastIndexOf(" ")).lastIndexOf(" ")) //get normal text until 2nd to last space
+
+    //make it say "Total Fails: x" or "Map Fails: x"
+    if (state === "finished") {
+      text += " §fTotal"
     }
     else {
-      runTime = formatTime(performance.now() - this.stateHandler.startTime)
+      text += " §fMap"
     }
-    text += " Total Time: §a" + runTime + "§f"
-    if (state === "Finished") {
-      let realTime = this.stateHandler.realTime
-      text += " Real Time: §a" + formatTime(realTime) + "§f"
+
+    text += parsedMessage.text.slice(parsedMessage.text.slice(0, parsedMessage.text.lastIndexOf(" ")).lastIndexOf(" ")) //get everything from 2nd to last space till end
+
+    // console.log(text)
+    
+    //undo json parse (stringify) and add to appropriate packet data field based on packet version 
+    if (legacyPacket) {
+      data.message = JSON.stringify({text: text})
     }
-    if (state !== "Waiting" && state !== "Finished") {
-      let mapTime = formatTime(performance.now() - this.stateHandler.lastSegmentTime)
-      text += " Map Time: §a" + mapTime + "§f"
+    else {
+      data.content = JSON.stringify({text: text})
     }
-    this.clientHandler.sendClientActionBar({
-      text
-    })
+
+    return { //replace packet contents (we are just replacing the text in data)
+      type: "replace",
+      meta,
+      data
+    }
+
   }
 }

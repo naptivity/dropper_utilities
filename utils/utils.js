@@ -1,4 +1,4 @@
-export function formatTime(ms) {
+export function formatTime(ms) { //given a time in ms, format it to be in mm:ss:mss (like Hypixel)
   //round to milliseconds, no micro or nano
   ms = Math.round(ms)
   //correct units

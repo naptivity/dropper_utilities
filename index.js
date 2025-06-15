@@ -1,16 +1,16 @@
 //this is the file that gets invoked first
 
 process.on("unhandledRejection", (reason, promise) => { //catches unhandled promise rejections
-  console.log("--- An error occurred, please report this to naptivity/lapisfloof on Discord ---")
+  console.log("--- An error occurred, please report this to naptivity on Discord ---")
   console.error(reason)
-  console.log("--- An error occurred, please report this to naptivity/lapisfloof on Discord ---")
+  console.log("--- An error occurred, please report this to naptivity on Discord ---")
 })
 
 process.on("uncaughtException", (error, origin) => { //catches uncaught exceptions
   if (error.code !== "CUSTOM_NOLOG") {
-    console.log("--- An exception occurred, please report this to naptivity/lapisfloof on Discord ---")
+    console.log("--- An exception occurred, please report this to naptivity on Discord ---")
     console.error(error)
-    console.log("--- An exception occurred, please report this to naptivity/lapisfloof on Discord ---")
+    console.log("--- An exception occurred, please report this to naptivity on Discord ---")
   }
   try {
     rl.close()

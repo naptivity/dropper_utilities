@@ -39,6 +39,11 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
 
     this.destroyed = false
 
+    //the below lists are made to contain modifier functions that will run on any outgoing/incoming packet. this is how we read/edit packets in internalmodules
+    //when replacing (editing) a packet, functions that come after the replacing function will see the updated packet
+    //the order that these modifier functions run is based on the order that the internal modules below are instantiated, since they are the ones that push the functions to the lists
+    //so statehandler should always come first since its designed to work on unmodified hypixel packets
+    //anything that replaces a packet should come last (although order doesn't really matter if anything afterward doesn't affect the same packets)
     this.outgoingModifiers = []
     this.incomingModifiers = []
 
@@ -151,7 +156,7 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
 
     userClient.on("end", (reason) => {
       proxyClient.end()
-      console.log(this.userClient.username + " disconnected from the proxy for reason " + reason)
+      console.log(this.userClient.username + " disconnected from the proxy for reason \"" + reason + "\"")
       this.destroy()
     })
 
@@ -263,5 +268,9 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
       })
     }
   }
-}
 
+
+  sendServerPartyChat(content) {
+    sendServerCommand("pchat " + content)
+  }
+}

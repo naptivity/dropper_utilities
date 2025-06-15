@@ -24,7 +24,7 @@ export class PartyChatThrottle {
   }
 
   handleOutgoingPacket(data, meta) {
-    if (meta.name !== "chat") return
+    if (meta.name !== "chat") return //assuming 1.8, fix (or remove completely)
     let trim = data.message.trim()
     if (!trim.startsWith("/")) return
     let split = trim.substring(1).split(" ")
@@ -46,9 +46,7 @@ export class PartyChatThrottle {
 
   addToQueue(command) {
     if (performance.now() - this.lastMessageTime > this.throttleDelay && this.queue.length === 0) {
-      this.proxyClient.write("chat", {
-        message: command
-      })
+      this.proxyClient.sendServerCommand(command) //this will break because of 2 slashes (fix)
       this.lastMessageTime = performance.now()
       return
     }
@@ -56,7 +54,7 @@ export class PartyChatThrottle {
     if (this.queue.length === 1) {
       this.nextMessageTimeout = setTimeout(() => {
         this.sendNextMessage()
-      }, (this.lastMessageTime + this.throttleDelay) -performance.now())
+      }, (this.lastMessageTime + this.throttleDelay) - performance.now())
     }
   }
 
