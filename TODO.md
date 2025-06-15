@@ -90,6 +90,7 @@
 - Replace AutoVote.js mapset identifier with StateHandler.js mapset identifier (once implemented)
 - Figure out why AutoVote sometimes just shits itself (misses chat messages, sends throttle message twice, doesn't say cancelling if match started)
   - Improve the way AutoVote reads chat messages?
+  - Also possibly make AutoVote handle when it sees it somehow revoked a map vote? Although that shouldnt normally happen so fixing the above issue might resolve it
 - Make AutoVote cancel faster if you close the window (clearing vote throttle timeout with clearTimeout, using a system entirely based on timeouts)
 - Make AutoVote retry every 3 seconds since that seems to be cooldown time? To keep chat cleaner
 

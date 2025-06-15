@@ -151,13 +151,13 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
 
     userClient.on("end", (reason) => {
       proxyClient.end()
-      console.log(reason)
+      console.log(this.userClient.username + " disconnected from the proxy for reason " + reason)
       this.destroy()
     })
 
     proxyClient.on("end", (reason) => {
       userClient.end(`§cProxy lost connection to Hypixel: §r${reason}`)
-      console.log(`§cProxy lost connection to Hypixel: §r${reason}`)
+      // console.log(`§cProxy lost connection to Hypixel: §r${reason}`)
     })
 
     userClient.on("error", () => {})

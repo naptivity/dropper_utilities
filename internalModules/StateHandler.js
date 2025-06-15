@@ -31,15 +31,15 @@ export class StateHandler extends EventEmitter {
 
     this.isFirstLogin = true
     this.requestedLocraw = false
-    this.tryLocrawTimeout = null
 
 
     this.isPartyLeader = null
-    this.partyMemberList = null //might wanna structure this to keep track of online/offline and whos running dropperutils
+    this.partyMemberList = null
     
-    this.requestedPartyList = false
-    this.updatedPartyList = false
-    this.tryPartyListTimeout = null
+    this.requestedPartyList = false //flag that specifies that /party chat command was sent out and parse the incoming messages
+    this.updatedPartyList = false //flag that specifies that /party chat messages were parsed and this.requestedPartyList can flip back once the next blue line is seen
+    this.partyUpdate = false //flag that enables when some chat message reported a change to the party, so once the next blue line is seen another party list update will be triggered and the flag will be flipped back
+    this.partyUpdatedSinceUtilsCheck = false
     
 
     //a lot of the stuff i want to add would greatly benefit from having a fleshed out, well written statehandler
@@ -63,13 +63,13 @@ export class StateHandler extends EventEmitter {
 
 
     //the statehandler will also keep track of:
-      //✅if the player is in a party (party member list is null or not), who is in the party, who the leader is
+      //✅if the player is in a party (party member list is null or not)
+      //✅who is in the party
+      //✅who the party leader is
       //who in the party is also running dropperutils (for distributed auto voting)
 
-      //the names of the players in your dropper lobby (for dodging and lobby hopping)
-      
+      //the names and amount of players in your dropper lobby (for dodging and lobby hopping)
       //the amount of time left for the dropper match to start (if any)
-      //the amount of players waiting in a dropper lobby
 
       //✅the mapset for the dropper server
       //✅the selected maps of the current game
@@ -163,9 +163,10 @@ export class StateHandler extends EventEmitter {
             if (this.updatedPartyList) { //if the party list was updated, this is the second instance of this message
               this.updatedPartyList = false //flip the flag, preventing other lines like this from being hidden
               this.requestedPartyList = false //the party list request was handled, so flip the flag
-              console.log(this.clientHandler.userClient.username)
-              console.log(this.isPartyLeader)
-              console.log(this.partyMemberList)
+              if (this.isPartyLeader) requestUtilsCheck()
+              // console.log("\n\nParty list check completed for", this.clientHandler.userClient.username)
+              // console.log("isPartyLeader:", this.isPartyLeader)
+              // console.log("partyMemberList:", this.partyMemberList)
             }
             return {
               type: "cancel" //stops party list packet from reaching user
@@ -182,7 +183,7 @@ export class StateHandler extends EventEmitter {
           }
           else break party_list_response_check
         }
-        else if (parsedMessage.color === "white" && !parsedMessage.text) return { //random empty message sent between "party members (x)" and the list of people
+        else if (parsedMessage.color === "white" && parsedMessage.text === "") return { //random empty message sent between "party members (x)" and the list of people
           type: "cancel" //stops party list packet from reaching user
         }
         else if (parsedMessage.color === "red" && parsedMessage.text === "You are not currently in a party.") { //we are not in a party
@@ -197,6 +198,10 @@ export class StateHandler extends EventEmitter {
       }
       else if (parsedMessage.color === "yellow") { //message has extra field, and color is yellow (all member list messages are yellow)
         if (parsedMessage.text === "Party Leader: ") { //if we are parsing the party leader message
+          this.updatedPartyList = true //we finished updating the party list, so make sure to let the last party list message know
+          //reason the above change happens here and not during "party members: " is because you can have a one player party if you invite someone
+          //and also the only guaranteed spot to have someone is leader (you can have only party moderators too)
+
           let onlineStatus = null
 
           if (parsedMessage.extra[parsedMessage.extra.length - 1].color === "green") { //online status indicator is green
@@ -255,7 +260,6 @@ export class StateHandler extends EventEmitter {
               }
             }
           }
-          if (parsedMessage.text === "Party Members: ") this.updatedPartyList = true //we finished updating the party list, so make sure to let the last party list message know
         }
         else break party_list_response_check
         return {
@@ -263,16 +267,65 @@ export class StateHandler extends EventEmitter {
         }
       }
       else break party_list_response_check
-
     }
 
 
-    party_member_update_check: {
-      //put logic in here that will retrigger p list response check if someone leaves/joins party, refreshing member list and online/offline statuses
+    party_update_check: { //logic that will retrigger party list check if someone leaves/joins party (or various other changes that can happen), refreshing member list, leader statuses, and online/offline statuses
+      if (this.requestedPartyList) break party_update_check //what are the odds that any of these happen while a check is happening... well reasonably high but i guess we'll just ignore it worst case the variables are a little outdated shouldnt affect much
+
+      if (this.partyUpdate) { //if we already saw a party update message
+        if (!parsedMessage.extra && parsedMessage.color === "blue" && parsedMessage.strikethrough && parsedMessage.text === "-----------------------------------------------------") { //finds the lines at the top and bottom of a party update message
+          //if the party was updated, this is the second instance of this message, so trigger the party list refresh again
+          //we dont trigger it right when we see the message because the party update logic will hide the second blue line and it will look ugly lol
+          //i believe this might also stop the check from running multiple times if multiple people get kicked from /p kickoffline? no clue tho
+          setTimeout(() => {
+            this.partyUpdate = false
+            this.requestPartyList() //actually request the update
+            // console.log("Party update retriggered party list update")
+          }, 2000) //waits 2 seconds because Hypixel tends to reject the command if we send it right after another command (if you are the person kicking someone else, you send the p list command in quick succession to p kick)
+          //also, only after adding this delay, i discovered the online status in /p list doesnt update for a bit after someone leaves, so this delay is necessary to get accurate online info lol (1.5 was too quick but 2 seems to be slow enough)
+          //the delay shouldnt affect much, as long as it eventually makes the update
+          break party_update_check
+        }
+      }
+
+      if (!parsedMessage.text) break party_update_check //party messages always have normal text fields
+      
+      if (!parsedMessage.extra) { //party update messages always have extra unless its the disband one or you left one
+        if (parsedMessage.color === "red" && parsedMessage.text === "The party was disbanded because all invites expired and the party was empty.") this.partyUpdate = true
+        else if (parsedMessage.color === "yellow" && parsedMessage.text === "You left the party.") this.partyUpdate = true 
+        else break party_update_check
+      }
+      else {
+        if (parsedMessage.color === "yellow") { //check for the messages that have consistent beginnings
+          if (parsedMessage.text === "You have joined " && parsedMessage.extra[parsedMessage.extra.length - 1].text === "party!") this.partyUpdate = true
+          else if (parsedMessage.text === "The party leader " && parsedMessage.extra[parsedMessage.extra.length - 1].text === "has rejoined.") this.partyUpdate = true
+          else if (parsedMessage.text === "The party leader, " && parsedMessage.extra[parsedMessage.extra.length - 1].text === "minutes to rejoin before the party is disbanded.") this.partyUpdate = true
+          else if (parsedMessage.text === "The party was transferred to ") this.partyUpdate = true
+          else if (parsedMessage.text === "You have been kicked from the party by ") this.partyUpdate = true
+          else if (parsedMessage.text === "Kicked " && parsedMessage.extra[parsedMessage.extra.length - 1].text === " because they were offline.") this.partyUpdate = true
+          else break party_update_check
+        }
+        else { //check for the messages that have consistent endings
+          let lastText = parsedMessage.extra[parsedMessage.extra.length - 1].text
+          if (parsedMessage.extra[parsedMessage.extra.length - 1].color === "yellow") {
+            if (lastText === "has been removed from the party.") this.partyUpdate = true
+            else if (lastText === "has rejoined.") this.partyUpdate = true
+            else if (lastText === "minutes to rejoin before they are removed from the party.") this.partyUpdate = true
+            else if (lastText === "has disbanded the party!") this.partyUpdate = true
+            else if (lastText === "joined the party.") this.partyUpdate = true
+            else if (lastText === "to Party Leader") this.partyUpdate = true
+            else if (lastText === "has left the party.") this.partyUpdate = true
+            else break party_update_check
+          }
+          else break party_update_check
+        }
+      }
     }
 
 
     party_member_utils_check: {
+
       //put logic in here that will:
         //1. respond to ONLY THE PARTY LEADER if they run a utils check
         //2. actually send out the message that will run the utils check if WE ARE PARTY LEADER
@@ -375,11 +428,11 @@ export class StateHandler extends EventEmitter {
       //no length check because extra is variable based on rank
       if (parsedMessage.extra.length > 3 && parsedMessage.extra[parsedMessage.extra.length - 3].text === "finished all maps in ") { //someone else completed game
         this.emit("player_finish", parsedMessage.extra[parsedMessage.extra.length - 5].text.split(" ").at(-1)) //length can change based on rank, this is a standardized way to get it
-        console.log("emitted player_finish", parsedMessage.extra[parsedMessage.extra.length - 5].text.split(" ").at(-1))
+        // console.log("emitted player_finish", parsedMessage.extra[parsedMessage.extra.length - 5].text.split(" ").at(-1))
       }
       else if (parsedMessage.extra.length === 3 && parsedMessage.extra[0].text === "You finished all maps in ") { //we completed game
         this.emit("player_finish", this.clientHandler.userClient.username)
-        console.log("emitted player_finish", this.clientHandler.userClient.username)
+        // console.log("emitted player_finish", this.clientHandler.userClient.username)
 
         //calculate real map time first to prevent overhead delay
         this.realTotalTime = performance.now() - this.gameStartTime
@@ -421,6 +474,7 @@ export class StateHandler extends EventEmitter {
       return 
     }
     
+
     fail_count_check: { //get fail count from game info bar
       if (this.game_state !== "playing") break fail_count_check //should be in playing state when checking this
       if (!parsedMessage.text.startsWith("§fMap Time: §a") && !parsedMessage.text.startsWith("§fTotal Time: §a")) break fail_count_check //action bar will always begin with either map time or total time (when done with game)
@@ -451,25 +505,51 @@ export class StateHandler extends EventEmitter {
       this.setGameState("none") //sets state back to none when changing servers
       if (this.isFirstLogin) { //if its the first login to the server (should wait longer to request locraw for it to not break)
         this.isFirstLogin = false //specify that it isnt the first login anymore
-        this.tryLocrawTimeout = setTimeout(() => {
-          if (this.clientHandler.destroyed) return //doesnt do locraw if the client left or crashed
-          this.requestedLocraw = true //flips the flag that lets statehandler know that a locraw chat was requested so it can parse it
-          this.clientHandler.sendServerCommand("locraw") //sends locraw command
-        }, 1500) //waits a second and a half before sending the locraw request
+        setTimeout(() => {
+          this.requestLocraw()
+          this.requestPartyList()
+        }, 1500) //waits a second and a half before sending the command requests
       }
       else {
-        this.tryLocrawTimeout = setTimeout(() => {
-          if (this.clientHandler.destroyed) return //doesnt do locraw if the client left or crashed
-          this.requestedLocraw = true //flips the flag that lets statehandler know that a locraw chat was requested so it can parse it
-          this.clientHandler.sendServerCommand("locraw") //sends locraw command
-        }, 150) //waits 150ms before sending the locraw request
+        setTimeout(() => {
+          this.requestLocraw()
+          this.requestPartyList()
+        }, 150) //waits 150ms before sending the command requests
       }
-      this.tryPartyListTimeout = setTimeout(() => { //no need to put this in the if statements because the timeouts above will already have waited, we also want the party list check to happen whenever locraw check happens
-        if (this.clientHandler.destroyed) return //doesnt do locraw if the client left or crashed
-        this.requestedPartyList = true //flips the flag that lets statehandler know that a locraw chat was requested so it can parse it
-        this.clientHandler.sendServerCommand("party list") //sends locraw command
-      }, 150) //waits 150ms before sending the locraw request
     })
+  }
+
+
+
+  requestLocraw() {
+    if (this.clientHandler.destroyed) return //doesnt do locraw if the client left or crashed
+    this.requestedLocraw = true //flips the flag that lets statehandler know that a locraw chat was requested so it can parse it
+    this.clientHandler.sendServerCommand("locraw") //sends locraw command
+  }
+
+
+
+  requestPartyList() {
+    if (this.clientHandler.destroyed) return //doesnt do party list if the client left or crashed
+    this.requestedPartyList = true //flips the flag that lets statehandler know that a party list chat was requested so it can parse it
+    
+    //reset everything so that we arent duplicating stuff lol, we're running a full check anyway
+    this.isPartyLeader = null
+    this.partyMemberList = null
+    
+    this.updatedPartyList = false
+
+    this.clientHandler.sendServerCommand("party list") //sends party list command
+    setTimeout(() => {
+      if (this.requestedPartyList) { //if the timeout completes and we are still requesting the party list then the command probably failed
+        // console.log("Retrying party list update")
+        this.requestPartyList() //so retry the party list
+      }
+    }, 2000)
+  }
+
+  requestUtilsCheck() {
+    
   }
 
 
@@ -504,6 +584,6 @@ export class StateHandler extends EventEmitter {
     //   console.log(this.hypixelTotalTime)
     // }
     this.emit("game_state", state) //emit game state event
-    console.log("emitted game_state", state)
+    // console.log("emitted game_state", state)
   }
 }

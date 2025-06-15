@@ -167,17 +167,17 @@ export class AutoVote {
             }
 
             // console.log(this.recentMessages)
-            if (this.recentMessages.includes(name)) {
+            if (this.recentMessages.includes(name)) { //if we find the map name in the recent messages
               this.trackChat = false
               success = true
             }
-            else if (this.recentMessages.includes("few seconds")) {
+            else if (this.recentMessages.includes("few seconds")) { //if we find a throttle message
               this.clientHandler.sendClientMessage({
-                text: `§9DropperUtilities > §rAuto vote throttled, waiting a second!` //currently this isnt working!!
+                text: `§9DropperUtilities > §rAuto vote throttled, waiting 2 seconds!`
               })
-              await new Promise(r => setTimeout(r, 1000)) //wait 1 second to try again
+              await new Promise(r => setTimeout(r, 2000)) //wait 2 seconds to try again
             }
-            else if (this.recentMessages.includes("You have no remaining votes!")) {
+            else if (this.recentMessages.includes("You have no remaining votes!")) { //if we find no remaining votes message for some reason
               this.clientHandler.sendClientMessage({
                 text: `§9DropperUtilities > §rNo votes available for some reason. Auto vote failed`
               })
