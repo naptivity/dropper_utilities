@@ -1,14 +1,16 @@
 import { isTrusted } from "../data/trusted.js"
 import { removeFormattingCodes } from "../utils/utils.js"
-import { list as commandList } from "./commandList.js"
+import { commandList } from "./commandList.js"
 
-export class UsageInstance {
+export class CommandInstance {
   constructor(clientHandler, string, uuid, source, proxy) {
     this.clientHandler = clientHandler
     this.fullString = string
     this.runnerUUID = uuid
     this.source = source
     this.proxy = proxy
+
+    this.isCommand = this.handle()
   }
 
   handle() {

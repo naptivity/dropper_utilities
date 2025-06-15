@@ -16,6 +16,7 @@
 - Auto distributing voting for multiple players in a party as long as they are running Dropperutils themselves (client communication through party chat)
   - Identify which users in party are running DropperUtils using pchat message
   - Assign numbers to each person running it so the client knows its role in voting (hardcode optimal voting distribution into client)
+    - Relay random string to relay back so that there isnt people faking running dropperutils lol
 
 
 - Auto requeue when all players in the party have finished the game
@@ -102,16 +103,13 @@
   - Packet capture break after certain packet?
 
 
-- Fix duplicate lost connection message showing in console, show what user left
+- Fix duplicate lost connection message showing in console and show what user left
 
 
 - Make sure chunk caching works based on mapset
 
 
-- Remove handler.js layer and just work directly with UsageInstance.js (make it CommandHandler.js)
-
-
-- Combine commandHelp and commandHelp2
+- Combine commands help.js and help2.js
 
 
 - Make commandAutoqueue chat messages use variables (currently redundant)

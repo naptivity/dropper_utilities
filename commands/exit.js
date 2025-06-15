@@ -6,8 +6,8 @@ export const aliases = ["quit", "end", "q"]
 export const allowedSources = ["console"]
 export const description = "Ends the proxy process"
 export const requireTrust = true
-export async function run(usageInstance) {
-  usageInstance.reply("§7Exiting...")
+export async function run(commandHandler) {
+  commandHandler.reply("§7Exiting...")
   await saveData()
   await saveChunks()
   process.exit()

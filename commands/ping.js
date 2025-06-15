@@ -6,7 +6,7 @@ export const aliases = []
 export const allowedSources = ["slash"]
 export const description = "Measures your ping to Hypixel."
 export const requireTrust = false
-export async function run(usageInstance) {
+export async function run(commandHandler) {
   let promise = ping({
     host: "mc.hypixel.net"
   })
@@ -14,16 +14,16 @@ export async function run(usageInstance) {
   promise.then(result => {
     if (alreadyReplied) return
     alreadyReplied = true
-    usageInstance.reply(`§7Current ping: §c${result.latency}ms§7.`)
+    commandHandler.reply(`§7Current ping: §c${result.latency}ms§7.`)
   })
   promise.catch(() => {
     if (alreadyReplied) return
     alreadyReplied = true
-    usageInstance.reply("§cFailed to ping Hypixel.")
+    commandHandler.reply("§cFailed to ping Hypixel.")
   })
   setTimeout(() => {
     if (alreadyReplied) return
     alreadyReplied = true
-    usageInstance.reply("§cFailed to ping Hypixel.")
+    commandHandler.reply("§cFailed to ping Hypixel.")
   }, 1000)
 }

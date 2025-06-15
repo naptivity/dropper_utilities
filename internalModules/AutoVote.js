@@ -116,18 +116,16 @@ export class AutoVote {
     this.completedWindowIds.push(data.windowId)
     let autoVoteMaps = null
     
-    let mapset = this.clientHandler.stateHandler.mapset
-    autoVoteMaps = autoVoteMapsLists[mapset.toLowerCase()]
+    let mapset = this.clientHandler.stateHandler.mapset //get mapset from statehandler
+    autoVoteMaps = autoVoteMapsLists[mapset.toLowerCase()] //get appropriate mapset autovote list from config
     this.clientHandler.sendClientMessage({
-      text: `§9DropperUtilities > §rMapset: ` + mapset
+      text: `§9DropperUtilities > §rMapset: ` + mapset //inform of mapset
     })
-
 
     //here is where it should figure out which 3 to vote
     if (autoVoteMaps.length > 3) {
       autoVoteMaps = autoVoteMaps.slice(0, 3)
     }
-
 
     autoVoteMaps = autoVoteMaps.map(item => item.toLowerCase()) //make the autovote lists lowercase for standardization
 
@@ -220,7 +218,6 @@ export class AutoVote {
   bindEventListeners() {
     this.clientHandler.stateHandler.on("game_state", state => {
       if (state === "waiting") { //when entered a game lobby and waiting
-        console.log(this.clientHandler.stateHandler.mapset)
         this.autoVoted = false //make sure we are able to process the necessary packets
         this.completedWindowIds = [] //reset windows that have been seen before since it resets on server transfer
         this.clientHandler.sendCustomServerPacket("held_item_slot", held_item_slot) //sets hand slot to 0 (for server)

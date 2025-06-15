@@ -7,13 +7,13 @@ export const aliases = ["dropperstats", "dstats"]
 export const allowedSources = ["slash"]
 export const description = "Shows player's statistics in Dropper."
 export const requireTrust = false
-export async function run(usageInstance) {
+export async function run(commandHandler) {
   let username
-  if (usageInstance.argsString !== "") {
-    username = usageInstance.argsString
+  if (commandHandler.argsString !== "") {
+    username = commandHandler.argsString
   }
   else {
-    username = usageInstance.clientHandler.userClient.username
+    username = commandHandler.clientHandler.userClient.username
   }
   let playerStats = await getPlayerStats(username)
   if (!playerStats) {
@@ -30,13 +30,13 @@ export async function run(usageInstance) {
   if (playerStats.fastestGame) {
     message += `§7, Fastest Time: §a${formatTime(playerStats.fastestGame)}`
   }
-  usageInstance.clientHandler.sendClientMessage(message)
+  commandHandler.clientHandler.sendClientMessage(message)
   return //map stats are too big //and now theyre broken cuz i broke the map diff file lol
   if (playerStats.maps.length === 0) {
-    usageInstance.clientHandler.sendClientMessage("§9DropperUtilities > §7No map statistics recorded yet.")
+    commandHandler.clientHandler.sendClientMessage("§9DropperUtilities > §7No map statistics recorded yet.")
     return
   }
-  usageInstance.clientHandler.sendClientMessage("§9DropperUtilities > §7Map Statistics (hover):")
+  commandHandler.clientHandler.sendClientMessage("§9DropperUtilities > §7Map Statistics (hover):")
   let mapsByKey = {}
   for (let map of playerStats.maps) {
     let difficulty = mapDifficulties[map.name]
@@ -97,25 +97,25 @@ export async function run(usageInstance) {
     mapsByKey[difficulty] = messageExtraList
   }
   if (mapsByKey.easy) {
-    usageInstance.clientHandler.sendClientMessage({
+    commandHandler.clientHandler.sendClientMessage({
       text: "",
       extra: mapsByKey.easy
     })
   }
   if (mapsByKey.medium) {
-    usageInstance.clientHandler.sendClientMessage({
+    commandHandler.clientHandler.sendClientMessage({
       text: "",
       extra: mapsByKey.medium
     })
   }
   if (mapsByKey.hard) {
-    usageInstance.clientHandler.sendClientMessage({
+    commandHandler.clientHandler.sendClientMessage({
       text: "",
       extra: mapsByKey.hard
     })
   }
   if (mapsByKey.undefined) {
-    usageInstance.clientHandler.sendClientMessage({
+    commandHandler.clientHandler.sendClientMessage({
       text: "",
       extra: mapsByKey.undefined
     })

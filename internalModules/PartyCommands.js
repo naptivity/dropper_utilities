@@ -1,4 +1,4 @@
-import { handleCommand } from "../commands/handler.js"
+import { CommandInstance } from "../commands/CommandInstance.js"
 
 export class PartyCommands {
   constructor(clientHandler) {
@@ -34,15 +34,16 @@ export class PartyCommands {
         //invalid JSON, Hypixel sometimes sends invalid JSON with unescaped newlines
         return
       }
-      if (parsedMessage.extra?.length !== 2) return
+      if (!parsedMessage.extra) return
+      if (parsedMessage.extra.length !== 2) return
       if (!parsedMessage.extra[0].text.startsWith("§9Party §8> ")) return
-      let sender = parsedMessage.extra[0].clickEvent.value.substring(13)
-      //trim UUID
-      sender = sender.replaceAll("-", "")
       let message = parsedMessage.extra[1].text
       if (!message.startsWith("!")) return
+      let sender = parsedMessage.extra[0].clickEvent.value.substring(13)
+      sender = sender.replaceAll("-", "") //trim UUID
       let string = message.substring(1)
-      handleCommand(this.clientHandler, string, sender, "party", this.clientHandler.proxy)
+      let command = new CommandInstance(this.clientHandler, string, sender, "party", this.clientHandler.proxy)
+      //no command.iscommand check, just ignore
     })
   }
 }

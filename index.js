@@ -25,7 +25,7 @@ process.on("uncaughtException", (error, origin) => { //catches uncaught exceptio
 
 import "./utils/hideWarning.js" //read the file to figure out what it does (doesnt really matter)
 import { Proxy } from "./Proxy.js" //class that actually handles making the local proxy server to connect to
-import { handleCommand } from "./commands/handler.js"
+import { CommandInstance } from "./commands/CommandInstance.js"
 import readline from "readline" //basic std/file input lib in node.js
 
 if (process.stopExecution) {
@@ -45,8 +45,8 @@ const rl = readline.createInterface({
 rl.on("line", handleLine)
 rl.on("SIGINT", handleSigint)
 function handleLine(line) {
-  let isCommand = handleCommand(null, line, null, "console", proxy)
-  if (!isCommand) console.log("Unknown command. Do \"help\" for a list of commands.")
+  let command = new CommandInstance(null, line, null, "console", proxy)
+  if (!command.isCommand) console.log("Unknown command. Do \"help\" for a list of commands.")
 } //handles a command passed into the cli console where the proxy is running, look at commands/handler.js to see what it does
 async function handleSigint() {
   //do nothing because people type ctrl+c to copy text too //seems like it just prevents ctrl c keyboardinterrupt
