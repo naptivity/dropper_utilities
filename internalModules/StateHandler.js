@@ -1,5 +1,5 @@
 import EventEmitter from "events"
-import { removeFormattingCodes } from "../utils/utils.js"
+import { randomString, removeFormattingCodes } from "../utils/utils.js"
 
 export class StateHandler extends EventEmitter {
   constructor(clientHandler) {
@@ -32,14 +32,19 @@ export class StateHandler extends EventEmitter {
     this.isFirstLogin = true
 
     this.requestedLocraw = false
+    this.locrawRequestTimeout = null
 
     this.isPartyLeader = null
-    this.partyMemberList = null
+    this.partyObject = null
     
     this.requestedPartyList = false //flag that specifies that /party chat command was sent out and parse the incoming messages
     this.updatedPartyList = false //flag that specifies that /party chat messages were parsed and this.requestedPartyList can flip back once the next blue line is seen
     this.partyUpdate = false //flag that enables when some chat message reported a change to the party, so once the next blue line is seen another party list update will be triggered and the flag will be flipped back
-    this.partyUpdatedSinceUtilsCheck = false
+    this.partyListRequestTimeout = null
+
+    this.requestedUtilsCheck = false
+    this.utilsCheckPassword = null
+    this.utilsCheckRequestTimeout = null
     
 
     //a lot of the stuff i want to add would greatly benefit from having a fleshed out, well written statehandler
@@ -60,6 +65,8 @@ export class StateHandler extends EventEmitter {
       //✅"map_finished" event, which emits when the player finishes (or skips) a map and provides information about that map run
 
       //✅"fail" event, which emits when the player fails
+
+      //"party_update" event, which emits when the party list is updated + utils check was done (only the party leader can start a utils check)
 
 
     //the statehandler will also keep track of:
@@ -125,6 +132,39 @@ export class StateHandler extends EventEmitter {
     // console.log(parsedMessage) //crazy how useful this is for chat packet reading and debug lmaoooo
 
 
+    locraw_response_check: { //checking if chat is a locraw response and parsing it if so
+      if (!this.requestedLocraw) break locraw_response_check //we didnt request a locraw check
+      if (parsedMessage.extra) break locraw_response_check //locraw is just text field
+      if (parsedMessage.color !== "white") break locraw_response_check //locraw is always white
+      let locraw_content = parsedMessage.text 
+      try {
+        locraw_content = JSON.parse(locraw_content) //parse locraw text since its json format
+      }
+      catch (error) {
+        break locraw_response_check
+      }
+
+      if (!locraw_content.server) break locraw_response_check //locraw string didnt respond with server field (shouldnt happen but doesnt hurt to check)
+      if (typeof locraw_content.server !== "string") break locraw_response_check //locraw should always be string
+      this.requestedLocraw = false //we are handling the locraw response so we can reset the flag
+      clearTimeout(this.locrawRequestTimeout) //clear the locraw retry timeout
+
+      if (!locraw_content.gametype || !locraw_content.mode || locraw_content.gametype !== "ARCADE" || locraw_content.mode !== "DROPPER") { //checking if locraw says we aren't in dropper lobby
+        this.setGameState("none")
+      }
+      else { //we are in dropper lobby
+        this.mapset = locraw_content.map //locraw provides the mapset
+        if (this.game_state === "none") {
+          this.setGameState("waiting") //since we are in a dropper lobby, set the state to waiting (state gets reset to none on every login so this check wont break stuff)
+        }
+        
+      }
+      return {
+        type: "cancel" //stops locraw packet from reaching user
+      }
+    }
+
+
     party_list_response_check: { //checking if chat is one of the many party list responses and parsing/hiding if so
       if (!this.requestedPartyList) break party_list_response_check //we didnt request a party list check
 
@@ -135,9 +175,18 @@ export class StateHandler extends EventEmitter {
             if (this.updatedPartyList) { //if the party list was updated, this is the second instance of this message
               this.updatedPartyList = false //flip the flag, preventing other lines like this from being hidden
               this.requestedPartyList = false //the party list request was handled, so flip the flag
+              clearTimeout(this.partyListRequestTimeout) //clear the party list retry timeout
               // console.log("\n\nParty list check completed for", this.clientHandler.userClient.username)
               // console.log("isPartyLeader:", this.isPartyLeader)
-              // console.log("partyMemberList:", this.partyMemberList)
+              // console.log("partyObject:", this.partyObject)
+
+              if (this.isPartyLeader && this.game_state === "waiting" && !this.requestedUtilsCheck) { //request utils check if party leader, only when waiting in dropper lobby (for voting), and only if one isnt already going on
+                setTimeout(() => { //wait a second because if you /p list and /pc in close succession a retry is forced
+                  this.requestUtilsCheck()
+                }, 1000) 
+                
+              }
+                
             }
             return {
               type: "cancel" //stops party list packet from reaching user
@@ -147,7 +196,7 @@ export class StateHandler extends EventEmitter {
         }
         else if (parsedMessage.color === "gold") { //the "party members (x)" title is gold
           if (parsedMessage.text.startsWith("Party Members (")) {
-            this.partyMemberList = [] //make the partymemberlist go from null to a list, indicating we indeed are in a party and allow us to add members
+            this.partyObject = {} //make the partyObject go from null to an object, indicating we indeed are in a party and allow us to add members
             return { //the text of "party members (x)"
               type: "cancel" //stops party list packet from reaching user
             }
@@ -159,7 +208,7 @@ export class StateHandler extends EventEmitter {
         }
         else if (parsedMessage.color === "red" && parsedMessage.text === "You are not currently in a party.") { //we are not in a party
           this.isPartyLeader = null //cant be party leader if there is no party
-          this.partyMemberList = null //set party member list to null (should be null when no one in party)
+          this.partyObject = null //set party member list to null (should be null when no one in party)
           this.updatedPartyList = true //we updated the party list
           return {
             type: "cancel" //stops party list packet from reaching user
@@ -191,13 +240,11 @@ export class StateHandler extends EventEmitter {
           }
           else this.isPartyLeader = false //not us, we are not party leader
 
-          let partyMemberObject = { //create the party member object with all the appropriate variables
-            username: name,
+          this.partyObject[name] = { //create the party member property with the appropriate object properties
             online_status: onlineStatus,
             party_leader: true, //we know its true cause this check is only for party leader
             running_utils: null
           }
-          this.partyMemberList.push(partyMemberObject) //add party member object to party member list
         }
         else if (parsedMessage.text === "Party Moderators: " || parsedMessage.text === "Party Members: ") {
           let nextFieldIsName = false
@@ -206,13 +253,11 @@ export class StateHandler extends EventEmitter {
             if (nextFieldIsName) {
               let name = parsedMessage.extra[i].text.split(" ").at(-1) //extract name from message
 
-              let partyMemberObject = { //create the party member object with all the appropriate variables
-                username: name,
+              this.partyObject[name] = { //create the party member property with the appropriate object properties
                 online_status: lastIndicatorOnlineStatus,
                 party_leader: false, //we know its false because party leader check is handled separately
                 running_utils: null
               }
-              this.partyMemberList.push(partyMemberObject) //add party member object to party member list
 
               nextFieldIsName = false
               lastIndicatorOnlineStatus = null
@@ -241,38 +286,6 @@ export class StateHandler extends EventEmitter {
     }
 
 
-    locraw_response_check: { //checking if chat is a locraw response and parsing it if so
-      if (!this.requestedLocraw) break locraw_response_check //we didnt request a locraw check
-      if (parsedMessage.extra) break locraw_response_check //locraw is just text field
-      if (parsedMessage.color !== "white") break locraw_response_check //locraw is always white
-      let locraw_content = parsedMessage.text 
-      try {
-        locraw_content = JSON.parse(locraw_content) //parse locraw text since its json format
-      }
-      catch (error) {
-        break locraw_response_check
-      }
-
-      if (!locraw_content.server) break locraw_response_check //locraw string didnt respond with server field (shouldnt happen but doesnt hurt to check)
-      if (typeof locraw_content.server !== "string") break locraw_response_check //locraw should always be string
-      this.requestedLocraw = false //we are handling the locraw response so we can reset the flag
-      if (!locraw_content.gametype || !locraw_content.mode || locraw_content.gametype !== "ARCADE" || locraw_content.mode !== "DROPPER") { //checking if locraw says we aren't in dropper lobby
-        this.setGameState("none")
-      }
-      else { //we are in dropper lobby
-        this.mapset = locraw_content.map //locraw provides the mapset
-        if (this.game_state === "none") {
-          this.setGameState("waiting") //since we are in a dropper lobby, set the state to waiting (state gets reset to none on every login so this check wont break stuff)
-          if (this.isPartyLeader) requestUtilsCheck() //request utils check if party leader, only when waiting in dropper lobby (for voting)
-        }
-        
-      }
-      return {
-        type: "cancel" //stops locraw packet from reaching user
-      }
-    }
-
-
     party_update_check: { //logic that will retrigger party list check if someone leaves/joins party (or various other changes that can happen), refreshing member list, leader statuses, and online/offline statuses
       if (this.requestedPartyList) break party_update_check //what are the odds that any of these happen while a check is happening... well reasonably high but i guess we'll just ignore it worst case the variables are a little outdated shouldnt affect much
 
@@ -282,13 +295,15 @@ export class StateHandler extends EventEmitter {
           //we dont trigger it right when we see the message because the party update logic will hide the second blue line and it will look ugly lol
           //i believe this might also stop the check from running multiple times if multiple people get kicked from /p kickoffline? no clue tho
           //also noticed that this prevents a timed out party update request from getting rid of blue lines on duplicate update messages (like a player leaving and the party also disbanding, but the disband message has no blue lines)
+
+          //waits 2 seconds to request party list because Hypixel tends to reject the command if we send it right after another command (if you are the person kicking someone else, you send the p list command in quick succession to p kick)
+          //also, only after adding this delay, i discovered the online status in /p list doesnt update for a bit after someone leaves, so this delay is necessary to get accurate online info lol (1.5 was too quick but 2 seems to be slow enough)
+          //the delay shouldnt affect much, as long as it eventually makes the update
           setTimeout(() => {
             this.partyUpdate = false
             this.requestPartyList() //actually request the update
             // console.log("Party update retriggered party list update")
-          }, 2000) //waits 2 seconds because Hypixel tends to reject the command if we send it right after another command (if you are the person kicking someone else, you send the p list command in quick succession to p kick)
-          //also, only after adding this delay, i discovered the online status in /p list doesnt update for a bit after someone leaves, so this delay is necessary to get accurate online info lol (1.5 was too quick but 2 seems to be slow enough)
-          //the delay shouldnt affect much, as long as it eventually makes the update
+          }, 2000) 
           return
         }
       }
@@ -299,6 +314,7 @@ export class StateHandler extends EventEmitter {
         if (parsedMessage.color === "red" && parsedMessage.text === "The party was disbanded because all invites expired and the party was empty.") this.partyUpdate = true
         else if (parsedMessage.color === "yellow" && parsedMessage.text === "You left the party.") this.partyUpdate = true 
         else break party_update_check
+        if (this.partyUpdate) return
       }
       else {
         if (parsedMessage.color === "yellow") { //check for the messages that have consistent beginnings
@@ -324,20 +340,73 @@ export class StateHandler extends EventEmitter {
           }
           else break party_update_check
         }
+        if (this.partyUpdate) return
       }
-      if (this.partyUpdate) return
     }
 
 
     party_member_utils_check: {
+      if (parsedMessage.text !== "") break party_member_utils_check //party chat has no normal text
+      if (!parsedMessage.extra) break party_member_utils_check //party chat always has extra
+      if (parsedMessage.extra.length !== 2) break party_member_utils_check //party chat always has extra length 2
+      if (!parsedMessage.extra[0].text.startsWith("§9Party §8> ")) break party_member_utils_check //will always start with that string
 
-      //put logic in here that will:
-        //1. respond to ONLY THE PARTY LEADER if they run a utils check
-        //2. actually send out the message that will run the utils check if WE ARE PARTY LEADER
-        //3. update the members in the party list according to whether they have utils running or not
-          //make sure to check with a random string to prevent people from faking it as a joke
-          //and make sure to add a timeout of like 500ms too so that anyone who responds after gets ignored
-        //4. update our list accordingly when the party leader runs a utils check
+      if (this.requestedPartyList) throw new Error("Party chat sent during party list update")
+
+      let partyMessage = parsedMessage.extra[1].text //extract party chat message
+      let partyMessageSender = parsedMessage.extra[0].text.split(" ").at(-2).slice(0, parsedMessage.extra[0].text.split(" ").at(-2).length - 3) //extract name from party chat message
+      if (partyMessageSender.startsWith("§")) partyMessageSender = partyMessageSender.slice(2) //if theyre a non they have a formatting code so remove it
+
+      if (!this.partyObject) throw new Error("Party chat somehow sent without being in party")
+
+      let partyLeader //variable that will hold who the party leader is
+      for (const user in this.partyObject) { //go thru each player in party
+        if (this.partyObject[user] && this.partyObject[user]["party_leader"] === true) { //if theyre leader
+          partyLeader = user //set variable
+          break //break loop obviously theres only one leader
+        }
+      }
+      if (!partyLeader) throw new Error("No party leader found in party list somehow")
+
+      if (partyMessage.startsWith("[DropperUtils check]") && partyMessageSender === partyLeader) { //if party chat is dropperutils check and if message came from party leader
+        this.partyObject[partyMessageSender]["running_utils"] = true //update party leader to have utils
+        this.utilsCheckPassword = partyMessage.slice(partyMessage.lastIndexOf(" ")) //get password for utils check
+
+        if (this.clientHandler.userClient.username !== partyLeader) { //we are not party leader
+          setTimeout(() => {
+            this.clientHandler.sendServerPartyChat("[DropperUtils response]" + this.utilsCheckPassword) //respond with the provided random string
+          }, Math.floor(Math.random() * 250)) //random delay to try and reduce ban/mute risk
+        }
+        else { //we are party leader
+          clearTimeout(this.utilsCheckRequestTimeout) //clear the retry timeout
+        }
+        
+        this.requestedUtilsCheck = true //set requestedutilscheck to true
+
+        setTimeout(() => { //set 500ms timeout for it to go back to false so no fake responses
+          this.requestedUtilsCheck = false
+          this.utilsCheckPassword = null
+
+          for (const user in this.partyObject) { //go thru each player in party
+            if (this.partyObject[user] && this.partyObject[user]["running_utils"] === null) { //if their utils status wasnt updated after timeout
+              this.partyObject[user]["running_utils"] = false //set utils status to false
+            }
+          }
+          console.log("Utils check complete for " + this.clientHandler.userClient.username)
+          console.log(this.partyObject)
+        }, 500) //timeout will not interfere with check retry because this entire thing triggers if it sees our own message (if we are leader/triggered the check)
+
+        return
+      }
+      else if (this.requestedUtilsCheck && partyMessage.startsWith("[DropperUtils response]") && partyMessage.endsWith(this.utilsCheckPassword)) { //requestedutilscheck true, is dropperutils response, and password is correct 
+        this.partyObject[partyMessageSender]["running_utils"] = true //set utils status to true
+      }
+      else return //irrelevant party chat message, packet wont have anything else useful 
+
+
+      
+        //update member to have utils
+        //return
     }
 
 
@@ -512,14 +581,12 @@ export class StateHandler extends EventEmitter {
         this.isFirstLogin = false //specify that it isnt the first login anymore
         setTimeout(() => {
           this.requestLocraw()
-          this.requestPartyList()
         }, 1500) //waits a second and a half before sending the command requests
       }
       else {
         setTimeout(() => {
           this.requestLocraw()
-          this.requestPartyList()
-        }, 150) //waits 150ms before sending the command requests
+        }, 150) //waits 150ms before sending the locraw request
       }
     })
   }
@@ -530,6 +597,13 @@ export class StateHandler extends EventEmitter {
     if (this.clientHandler.destroyed) return //doesnt do locraw if the client left or crashed
     this.requestedLocraw = true //flips the flag that lets statehandler know that a locraw chat was requested so it can parse it
     this.clientHandler.sendServerCommand("locraw") //sends locraw command
+
+    this.locrawRequestTimeout = setTimeout(() => {
+      if (this.requestedLocraw) { //if the 2 second timeout completes and we are still requesting locraw then the command probably failed
+        // console.log("Retrying locraw request")
+        this.requestLocraw() //so retry the locraw request
+      }
+    }, 2000)
   }
 
 
@@ -540,21 +614,41 @@ export class StateHandler extends EventEmitter {
     
     //reset everything so that we arent duplicating stuff lol, we're running a full check anyway
     this.isPartyLeader = null
-    this.partyMemberList = null
+    this.partyObject = null
     
     this.updatedPartyList = false
 
+    //should also cancel any running utils check when we are doing this, will retrigger after done if necessary
+    this.requestedUtilsCheck = false
+    this.utilsCheckPassword = null
+    clearTimeout(this.utilsCheckRequestTimeout)
+
     this.clientHandler.sendServerCommand("party list") //sends party list command
-    setTimeout(() => {
-      if (this.requestedPartyList) { //if the timeout completes and we are still requesting the party list then the command probably failed
+
+    this.partyListRequestTimeout = setTimeout(() => {
+      if (this.requestedPartyList) { //if the 2 second timeout completes and we are still requesting the party list then the command probably failed
         // console.log("Retrying party list update")
         this.requestPartyList() //so retry the party list
       }
     }, 2000)
   }
 
+
+
   requestUtilsCheck() {
+    if (this.clientHandler.destroyed) return //doesnt do party list if the client left or crashed
+    // console.log("requested utils check")
+    this.requestedUtilsCheck = true
+    if (this.partyObject) this.clientHandler.sendServerPartyChat("[DropperUtils check] " + randomString(12))
+    else throw new Error("RequestUtilsCheck called when there was no party? How????")
     
+
+    this.utilsCheckRequestTimeout = setTimeout(() => {
+      if (this.requestedUtilsCheck) { //if the 3 second timeout completes and we are still requesting the utils check then the chat probably failed
+        // console.log("Retrying utils check")
+        this.requestUtilsCheck() //so retry the utils check
+      }
+    }, 3000)
   }
 
 
@@ -575,6 +669,9 @@ export class StateHandler extends EventEmitter {
       this.realTotalTime = null
       this.hypixelTotalTime = null
     }
+    if (state === "waiting") {
+      this.requestPartyList()
+    }
     // else if (state === "finished") {
     //   console.log(this.mapset)
     //   console.log(this.maps)
@@ -588,9 +685,9 @@ export class StateHandler extends EventEmitter {
     //   console.log(this.realTotalTime)
     //   console.log(this.hypixelTotalTime)
     // console.log(this.isPartyLeader)
-    // console.log(this.partyMemberList)
+    // console.log(this.partyObject)
     // }
     this.emit("game_state", state) //emit game state event
-    // console.log("emitted game_state", state)
+    console.log("emitted game_state", state)
   }
 }

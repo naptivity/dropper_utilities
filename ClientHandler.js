@@ -271,6 +271,6 @@ export class ClientHandler extends EventEmitter { //basically just allow the cla
 
 
   sendServerPartyChat(content) {
-    sendServerCommand("pchat " + content)
+    this.sendServerCommand("pchat " + content)
   }
 }

@@ -56,10 +56,8 @@ export class CommandInstance {
       await this.command.run(this)
     }
     catch (error) {
-      console.log("--- An exception occurred, please report this to naptivity on Discord ---")
-      console.error(error)
-      console.log("--- An exception occurred, please report this to naptivity on Discord ---")
-      this.reply("§cAn error occured while running that command, check the console window for more information.")
+      this.reply("§cAn error occured while running that command, check the console window for more information. Please report to naptivity on Discord")
+      throw error
     }
     this.running = false
   }

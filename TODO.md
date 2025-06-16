@@ -97,9 +97,6 @@
 - Don't forget to comment literally everything once I'm done (make sure I don't miss something)
 
 
-- Fix BetterGameInfo because it broke with new StateHandler format and is currently broken
-
-
 - Figure out why AutoVote sometimes just shits itself (misses chat messages, sends throttle message twice, doesn't say cancelling if match started)
   - Improve the way AutoVote reads chat messages?
   - Also possibly make AutoVote handle when it sees it somehow revoked a map vote? Although that shouldnt normally happen so fixing the above issue might resolve it
@@ -144,9 +141,6 @@
 
 
 - Figure out with Lapis if license is okay to delete
-
-
-- See if all those error messages located not in index.js can just rely on index.js
 
 
 - Consider if eval command is worthwhile to keep

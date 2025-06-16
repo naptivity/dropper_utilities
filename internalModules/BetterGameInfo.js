@@ -41,7 +41,7 @@ export class BetterGameInfo {
       parsedMessage = JSON.parse(actualMessage) //parse actionbar json
     }
     catch (error) { //invalid JSON, Hypixel sometimes sends invalid JSON with unescaped newlines
-      return 
+      return
     }
 
 

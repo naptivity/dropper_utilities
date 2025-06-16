@@ -34,6 +34,7 @@ export class PartyCommands {
         //invalid JSON, Hypixel sometimes sends invalid JSON with unescaped newlines
         return
       }
+      
       if (!parsedMessage.extra) return
       if (parsedMessage.extra.length !== 2) return
       if (!parsedMessage.extra[0].text.startsWith("§9Party §8> ")) return

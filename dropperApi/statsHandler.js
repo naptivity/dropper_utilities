@@ -85,7 +85,6 @@ async function fetchPlayers(uuids) {
   }
   catch (error) {
     console.log("Unexpected Dropper API error - please report to naptivity on Discord:")
-    console.log(error)
-    return null
+    throw error
   }
 }

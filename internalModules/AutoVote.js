@@ -1,7 +1,7 @@
-import { fantasyMapset, abstractMapset, futuristicMapset, landscapeMapset } from "../utils/mapsets.js"
 import { config } from "../configHandler.js"
 import { close_window, held_item_slot, use_item, window_click } from "../utils/templatePackets.js"
 
+let enabled = config["auto-vote"]
 let autoVoteMapsLists = config["auto-vote-maps"]
 //yes you have to fix the lists because yaml lists dont work like that idk why the perfect map reqs config was formatted like that
 autoVoteMapsLists.fantasy = autoVoteMapsLists.fantasy[0].split(",").map(item => item.trim())
@@ -50,6 +50,7 @@ export class AutoVote {
 
 
   handleIncomingPacketChecks(data, meta) {
+    if (!enabled) return
     if (this.autoVoted) return //if autovoting is over we shouldnt do it again
     if (meta.name === "open_window" && JSON.parse(data.windowTitle).translate === "Map Voting") { //if its an open window packet specifically for map voting gui
       this.windowId = data.windowId //set the window id to the window id of the detected map voting gui
@@ -217,6 +218,7 @@ export class AutoVote {
 
   bindEventListeners() {
     this.clientHandler.stateHandler.on("game_state", state => {
+      if (!enabled) return
       if (state === "waiting") { //when entered a game lobby and waiting
         this.autoVoted = false //make sure we are able to process the necessary packets
         this.completedWindowIds = [] //reset windows that have been seen before since it resets on server transfer

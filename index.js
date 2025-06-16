@@ -35,6 +35,7 @@ if (process.stopExecution) {
   throw errorThrowing
 }
 
+console.log("If you get any errors or have any issues, please report to naptivity on Discord") 
 console.log("Starting proxy...") 
 
 const rl = readline.createInterface({

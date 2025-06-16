@@ -21,6 +21,7 @@ perfect-maps:
     - Well, Balloons, Sewer, Floating Islands, Iris
     - Well, Balloons, Floating Islands, Sewer, Iris
 
+auto-vote: false
 auto-vote-maps:
   fantasy:
     - Well, King's Pass, Beanstalk, Warportal, Hell Gate
